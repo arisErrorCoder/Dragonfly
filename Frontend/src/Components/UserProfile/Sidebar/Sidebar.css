@@ -1,0 +1,106 @@
+.sidebar-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  max-height: 800px;
+
+}
+.sidebar-container .content{
+  overflow: scroll;
+}
+.sidebar-container .sidebar {
+  width: 80px;
+  background-color: #8c923554;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  position: relative;
+  gap: 29px;
+}
+
+.sidebar-container .profile-section {
+  margin-bottom: 1rem;
+}
+
+.sidebar-container .profile-pic {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+.sidebar-container .menu-items {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.sidebar-container .menu-item {
+  margin: 1rem 0;
+  padding: 8px 0px;
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
+}
+
+.icon {
+  color: rgb(0, 0, 0);
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.settings-section {
+  margin-top: 1rem;
+}
+
+.settings-icon {
+  color: rgb(0, 0, 0);
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.menu-item.active, .settings-icon.active {
+  background-color: white;
+}
+
+.menu-item.active .icon, .settings-icon.active {
+  color: #007bff;
+}
+
+@media (max-width: 567px) {
+  .sidebar-container {
+    display: none;
+  }
+}
+.menu-item,
+.settings-icon {
+  position: relative;
+  cursor: pointer;
+}
+
+.menu-item::after,
+.settings-icon::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 90%;
+  bottom: -30px; /* Adjust this to position the tooltip */
+  transform: translateX(-50%);
+  background-color: #333;
+  color: #fff;
+  font-size: 12px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.menu-item:hover::after,
+.settings-icon:hover::after {
+  opacity: 1;
+  visibility: visible;
+}

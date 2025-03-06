@@ -1,0 +1,134 @@
+.coupons-page {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #000000;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.coupons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.coupon-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-radius: 10px;
+    color: #fff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.coupon-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-right: 20px;
+    border-right: 2px dashed rgba(255, 255, 255, 0.5);
+}
+
+.coupon-icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+
+.coupon-discount {
+    font-size: 24px;
+    text-align: center;
+}
+
+.discount-percentage {
+    font-size: 40px;
+    font-weight: bold;
+    display: block;
+}
+
+.coupon-right {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 20px;
+}
+
+.gift-code {
+    font-size: 18px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.qr-code {
+    width: 95px;
+    height: 75px;
+    object-fit: cover;
+}
+
+.blue-gradient {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+}
+
+.green-gradient {
+    background: linear-gradient(135deg, #77e863, #3cf06f);
+}
+
+.red-gradient {
+    background: linear-gradient(135deg, #ff0d21, #ff7a7a);
+}
+
+.yellow-gradient {
+    background: linear-gradient(135deg, #ff822a, #ffeb6b);
+}
+
+.purple-gradient {
+    background: linear-gradient(135deg, #931fff, #bd8dff);
+}
+
+.pink-gradient {
+    background: linear-gradient(135deg, #ff1bd1, #de82c5);
+}
+
+.orange-gradient {
+    background: linear-gradient(135deg, #da4b0f, #f19466);
+}
+
+.sky-blue-gradient {
+    background: linear-gradient(135deg, #008d97d3, #81dee9);
+}
+
+.golden-gradient {
+    background: linear-gradient(135deg, #cfa20f, #9f974c);
+}
+/* Responsive design */
+@media (max-width: 567px) {
+    .coupons-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .coupon-card {
+        padding: 10px;
+    }
+
+    .coupon-discount {
+        font-size: 20px;
+    }
+
+    .discount-percentage {
+        font-size: 30px;
+    }
+}

@@ -1,0 +1,136 @@
+
+
+/* Container for the entire package management section */
+.package-container {
+  max-width: 1000px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Form container */
+.package-container .form-container {
+  margin-bottom: 20px;
+}
+
+.package-container input[type="text"],
+.package-container input[type="number"],
+.package-container select {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.package-container input[type="file"] {
+  margin: 10px 0;
+}
+
+/* Image preview section */
+.package-container .image-preview {
+  display: flex;  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.package-container .image-item {
+  position: relative;
+}
+
+.package-container .image-item img {
+  width: 100px;
+  height: 100px;
+  border-radius: 4px;
+}
+
+.package-container .delete-image-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: rgba(255, 0, 0, 0.7);
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 2px 5px;
+}
+
+
+
+
+.package-container li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f9f9f9;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 4px;
+}
+
+.package-container li button {
+  background: transparent;
+  border: none;
+  color: #ff4d4d;
+  cursor: pointer;
+}
+
+/* Button styles */
+.package-container button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 10px 0;
+}
+
+.package-container button:hover {
+  background-color: #218838;
+}
+
+/* Scroll to Top button */
+.package-container .scroll-to-top {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.package-container .scroll-to-top:hover {
+  background-color: #0056b3;
+}
+
+.currentPagesList li {
+  background-color: #afbac5;
+  display: inline;
+}
+
+.currentPagesList li button {
+  color: #0056b3;
+
+}
+
+/* Responsive styles */
+@media (max-width: 600px) {
+  .package-container .image-preview {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .package-container .image-item img {
+    width: 80px;
+    height: 80px;
+  }
+}

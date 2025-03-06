@@ -1,0 +1,67 @@
+.remainder-container-mobile {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+  }
+  
+  .reminder-form-mobile {
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .reminder-form-mobile h2 {
+    margin-bottom: 0.5rem;
+  }
+  
+  .reminder-form-mobile select,
+  .reminder-form-mobile input[type="text"],
+  .reminder-form-mobile input[type="time"],
+  .reminder-form-mobile button {
+    width: 100%;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .calendar-and-reminders-mobile {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .reminders-content-mobile {
+    margin-bottom: 1rem;
+  }
+  
+  .reminder-list-mobile {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .reminder-list-mobile li {
+    background: #a08a8a;
+    border-radius: 8px;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    position: relative;
+  }
+  
+  .reminder-buttons-mobile {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+  }
+  
+ .react-calendar button{
+    color: black;
+ }
+  .circle-marker {
+    width: 12px; /* Adjust size as needed */
+    height: 12px; /* Adjust size as needed */
+    background-color: red; /* Change color as needed */
+    border-radius: 50%;
+    margin: auto;
+  }
+  

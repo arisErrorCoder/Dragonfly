@@ -1,0 +1,22 @@
+.video-wrapper {
+    width: 100%;
+  }
+  
+  video {
+    width: 100%;
+    height: auto;
+    border: 1px solid #ccc;
+    margin-top: 40px;
+  }
+  
+
+  @media (max-width:450px) {
+    .video-wrapper video {
+      /* aspect-ratio: 375 / 562;
+      object-fit: cover; */
+      display: none;
+ 
+    }
+    
+
+  }

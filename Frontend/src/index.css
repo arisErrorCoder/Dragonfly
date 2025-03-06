@@ -1,0 +1,38 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  
+}
+
+
+html, body {
+  width: 100%;
+  height: 100%; 
+  /* overflow-x: hidden;   */
+}
+
+.main-container {
+  width: 100%;
+} 
+/* For desktop, hide BottomBar and show Sidebar */
+@media (min-width: 768px) {
+  .bottomBar {
+    display: none;
+  }
+
+  .sidebar {
+    display: block;
+  }
+}
+
+/* For mobile, hide Sidebar and show BottomBar */
+@media (max-width: 767px) {
+  .bottomBar {
+    display: block;
+  }
+
+  .sidebar {
+    display: none;
+  }
+}

@@ -1,0 +1,137 @@
+.hotel-container{
+    width: 100%;
+    height: 550px;
+}
+
+.drgonfly-hotel-container {
+    position: relative;
+    width: 100%;
+    height: auto;
+  }
+  
+  .drgonfly-hotel-container img {
+    width: 100%;
+    height: 500px;
+    object-fit: cover; /* Ensure the image scales properly */
+  }
+  
+  .hotel-container .search-bar {
+    position: absolute;
+    top: 550px;
+    left: 50%;
+    transform: translate(-50%, 90%);
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 80%;
+    max-width: 1000px;
+  }
+  
+  .date-input, .room-guests {
+    margin-right: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .date-input label, .room-guests label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  
+  .date-input input[type="text"], .room-guests select {
+    padding: 10px;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    cursor: pointer;
+  }
+  
+  .book-now {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+  
+  .book-now:hover {
+    background-color: #45a049;
+  }
+  
+  /* Responsive styling */
+  @media (max-width: 768px) {
+    .hotel-container .search-bar {
+      flex-direction: column;
+      width: 90%;
+      padding: 15px;
+      top: 190px;
+      margin-left:0px ;
+    }
+  
+    .date-input, .room-guests {
+      margin-right: 0;
+      margin-bottom: 15px;
+      width: 100%;
+    }
+  
+    .book-now {
+      width: 100%;
+    }
+  }
+  
+  @media (max-width: 425px) {
+    .hotel-container .search-bar {
+      padding: 10px;
+      padding: 15px;
+      top: 300px;
+      margin-left: 0px;
+    }
+  
+    .date-input input[type="text"], .room-guests select {
+      font-size: 14px;
+      padding: 8px;
+    }
+  
+    .book-now {
+      font-size: 14px;
+    }
+  }
+  
+
+
+
+
+
+
+  /* Extra  */
+  /* Spinner Styles */
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh; /* Full viewport height */
+  }
+  
+  .spinner {
+    border: 8px solid #f3f3f3; /* Light grey */
+    border-top: 8px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }

@@ -1,0 +1,168 @@
+
+ .supriseplanner {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.supriseplanner h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Tab buttons */
+.supriseplanner button {
+  padding: 10px 15px;
+  margin-right: 10px;
+  background-color: #007bff;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.supriseplanner button:hover {
+  background-color: #0056b3;
+}
+
+/* Input fields */
+.supriseplanner input[type="text"],
+.supriseplanner  input[type="number"],
+.supriseplanner  select {
+  width: calc(100% - 20px);
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.supriseplanner  input[type="file"] {
+  margin-bottom: 20px;
+}
+
+.supriseplanner  textarea {
+  width: calc(100% - 20px);
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+/* Section Containers */
+.supriseplanner  .section {
+  margin-bottom: 20px;
+  padding: 20px;
+  border: 1px solid #e1e1e1;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+.supriseplanner  
+.section h4 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+/* Add Button */
+.supriseplanner  .add-btn {
+  padding: 8px 12px;
+  background-color: #28a745;
+  border: none;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.supriseplanner  .add-btn:hover {
+  background-color: #218838;
+}
+
+/* Delete Button */
+.supriseplanner  .delete-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 5px 8px;
+  margin-left: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 5px;
+}
+
+.supriseplanner  .delete-btn:hover {
+  background-color: #c82333;
+}
+
+/* Lists */
+.supriseplanner  ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.supriseplanner  li {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px solid #ccc;
+}
+
+.supriseplanner  li:last-child {
+  border-bottom: none;
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+  .supriseplanner  {
+    padding: 10px;
+  }
+
+  .supriseplanner  button {
+    margin-bottom: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .supriseplanner  h2 {
+    font-size: 20px;
+  }
+
+  .supriseplanner  input[type="text"],
+  .supriseplanner  input[type="number"],
+  .supriseplanner  select {
+    width: 100%;
+  }
+}
+.image-previews {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.image-preview {
+  position: relative;
+}
+
+.image-preview img {
+  width: 100px; /* Adjust as needed */
+  height: auto; /* Maintain aspect ratio */
+  border-radius: 5px;
+}
+
+.remove-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: red;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}

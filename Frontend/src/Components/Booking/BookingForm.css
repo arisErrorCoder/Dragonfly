@@ -1,0 +1,107 @@
+.form-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  min-height: 400px; /* Adjust as needed to ensure enough space for button positioning */
+}
+
+.form-wrapper {
+  flex: 1; /* Take up remaining space to push the button to the bottom */
+  padding: 20px;
+}
+
+.form-container h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.form-container .booking-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* Make sure the form grows to take up remaining space */
+}
+
+.form-container .form-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 15px;
+}
+
+.form-container .form-group {
+  flex: 1;
+}
+
+.form-container .form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-container .form-group input, .form-group select, .form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+.form-container .form-group textarea {
+  height: 100px;
+  resize: vertical;
+}
+
+.form-container .error {
+  color: red;
+  font-size: 0.9rem;
+  margin-top: 5px;
+}
+
+.form-container .button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 15px; /* Push button to the bottom */
+}
+
+.form-container button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  background-color: #28a745;
+  color: white;
+  font-size: 0.9rem;
+  cursor: pointer;
+  width:100%;
+}
+
+.form-container button:hover {
+  background-color: #218838;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .form-container {
+    padding: 15px;
+  }
+  
+  .form-container .form-row {
+    flex-direction: column;
+  }
+
+  .form-container .form-group {
+    margin-bottom: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-container {
+    padding: 10px;
+  }
+}
+
+

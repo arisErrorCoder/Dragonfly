@@ -1,0 +1,403 @@
+.image-gallery-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+    margin: 20px;
+  }
+  
+  .image-preview {
+    flex: 1 1 20%;
+  }
+  
+  .image-preview img {
+    width: 100%;
+    min-width: 300px;
+    object-fit: cover;
+  }
+  
+  .image-thumbnails {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .image-thumbnails img {
+    width: 80px;
+    cursor: pointer;
+    object-fit: cover;
+  }
+  
+  .image-thumbnails img.active {
+    border: 2px solid #000;
+  }
+  
+  .product-details {
+    flex: 1 1 50%;
+    line-height: 50px;
+    color: black;
+  }
+  .product-details h1{
+    font-size: 40px;
+  }
+  
+  .product-details .price {
+    font-size: 24px;
+    color: #000000;
+  }
+  
+  .product-details .ratings {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+  }
+  
+  .product-details .actions {
+    display: flex;
+    gap: 15px;
+    margin: 20px 0;  }
+  
+   .actions button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #000;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .reviews-container {
+    margin-top: 20px;
+    color: black;
+  }
+  
+  .reviews h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  .reviews p {
+    margin: 5px 0;
+  }
+  
+  .mobile-carousel {
+    display: none;
+  }
+  
+  @media (max-width: 768px) {
+    .image-gallery-container {
+      flex-direction: column;
+    }
+  
+    .image-preview,
+    .image-thumbnails,
+    .product-details {
+      width: 100%;
+    }
+  
+    .image-thumbnails {
+      flex-direction: row;
+      overflow-x: auto;
+    }
+  
+    .image-thumbnails img {
+      width: 60px;
+    }
+  
+    .mobile-carousel {
+      display: block;
+    }
+  
+    .image-preview,
+    .image-thumbnails {
+      display: none;
+    }
+    .product-details .actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      }
+  }
+  
+  @media (max-width:430px) {
+    .product-details h1,h2{
+      font-size: 20px;
+    }
+    
+  }
+
+
+  /* Additional Information Cards css */
+  
+  .Additional-Information-card-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding: 20px;
+    gap: 10px;
+  }
+  
+  .card {
+    background-color: #8c923554;
+    padding: 20px;
+    cursor: pointer;
+    border-radius: 10px;
+    flex: 1;
+    min-width: 200px;
+    box-sizing: border-box;
+    position: relative;
+  }
+  
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .card h2 {
+    margin: 0;
+    font-size: 16px;
+    color: black;
+  }
+  
+  .card p {
+    margin: 10px 0 0;
+    color: black;
+    /* display: none; */
+  }
+  
+  .card-content {
+    display: block;
+  }
+  
+  .toggle-icon {
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  @media (max-width: 600px) {
+    .Additional-Information-card-container {
+      flex-direction: column;
+    }
+  
+    .card h2 {
+      margin: 0;
+      font-size: 14px;
+    }
+  
+    .card p {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+  }
+   
+
+
+  /* Addons slider css */
+  .Addons-slider-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 100%;
+  }
+  
+  .slider {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding: 10px;
+    gap: 20px;
+    width: 100%;
+  }
+  
+  .product-cards {
+    min-width: 250px;
+    max-width: 250px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 30px 15px;
+    cursor: pointer;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  .slider::-webkit-scrollbar {
+    display: none;
+  }
+  .product-cards img {
+    width: 200px; /* Fixed width */
+    height: 200px; /* Fixed height */
+    object-fit: cover; /* Maintain aspect ratio and fill the area */
+    border-radius: 5px; /* Rounded corners for image */
+  }
+  
+  .product-cards h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  .product-cards p {
+    font-size: 16px;
+    margin-bottom: 15px;
+    color: #333;
+  }
+  
+  .booking-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .booking-section input {
+    margin-right: 10px;
+  }
+  
+  .booking-section label {
+    font-size: 14px;
+    color: #555;
+  }
+  
+  .prev-btn,
+  .next-btn {
+    background-color: #333;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    font-size: 15px;
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  .prev-btn {
+    left: 0;
+  }
+  
+  .next-btn {
+    right: 0;
+  }
+  
+  .prev-btn:hover,
+  .next-btn:hover {
+    background-color: #555;
+  }
+
+  @media (max-width:430px) {
+    .product-cards{
+      min-width: 150px;
+      max-width: 150px;
+      border-radius: 10px;
+      padding: 10px 15px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    .prev-btn, .next-btn{
+      padding: 3px 7px;
+    }
+    .product-cards img {
+      width: 120px; /* Further reduce image size */
+      height: 90px; /* Adjust height accordingly */
+    }
+    .booking-section {
+      display: block;
+    }
+  }
+  
+
+
+  /* Reviews css */
+  .reviews-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin: 20px;
+    padding: 10px;
+  }
+  
+  .reviews-section {
+    flex: 1;
+    margin-right: 20px;
+  }
+  
+  .review {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+  }
+  
+  .reviewer-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+  
+  .review-details {
+    flex: 1;
+  }
+  
+  .rating {
+    color: #f39c12;
+    margin-bottom: 5px;
+  }
+  
+  .date {
+    color: #777;
+    font-size: 0.9em;
+  }
+  
+  .comment {
+    margin-top: 5px;
+  }
+  
+  .read-more {
+    margin-top: 10px;
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .similar-section {
+    flex: 0.4;
+    min-width: 150px;
+  }
+  
+  .similar-img {
+    width: 100%;
+    border-radius: 10px;
+  }
+  
+  .booking-button {
+    margin-top: 20px;
+    padding: 15px 30px;
+    background-color: #8c923554;
+    color: rgb(0, 0, 0);
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 18px;
+    font-weight: bold;
+    align-self: center;
+    text-align: center;
+    width: 100%;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .reviews-container {
+      flex-direction: column;
+    }
+  
+    .reviews-section {
+      margin-right: 0;
+    }
+  }

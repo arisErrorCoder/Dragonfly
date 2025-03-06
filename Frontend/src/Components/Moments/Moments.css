@@ -1,0 +1,145 @@
+.big-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: center;
+}
+
+.main-containerr {
+    display: grid;
+    grid-template-columns: 623px 300px 300px;
+    grid-template-rows: repeat(3, 200px);
+    gap: 10px;
+}
+
+.first-row,
+.second-row,
+.third-row {
+    grid-column: 1 / span 3;
+    display: grid;
+    grid-template-columns: 623px 300px 300px;
+    gap: 10px;
+}
+
+.box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #ccc;
+    overflow: hidden;
+}
+
+.box-1, .box-6, .box-7 {
+    width: 623px;
+    height: 200px;
+}
+
+.box-2, .box-3, .box-4, .box-5,.box-8, .box-9 {
+    /* width: 300px; */
+    height: 200px;
+}
+
+
+.box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.box-9 {
+    background-color: #b7c9f0;
+    text-align: center;
+    cursor: pointer;
+    
+}
+
+.box-9:hover{
+    background-color: #818ea9;
+}
+.box-9 button:hover {
+    background-color: #818ea9;
+}
+.box-9 button {
+    font-size: 18px;
+    font-weight: bold;
+    color: #000000;
+    background-color: transparent;
+    border: 0px;
+}
+
+/* Carousel styles */
+.carousell {
+    display: none;
+    width: 100%;
+    height: 300px;
+}
+/* .slider-container{
+    width: 100%;
+    height: 100px;
+} */
+.carousel-slide img {
+    width: 100%;
+    height: 270px;
+    object-fit: cover;
+}
+
+/* Responsive styles */
+@media (max-width: 1250px) {
+    .big-container {
+        width: 90%;
+        height: 90%;
+        margin-left: 18px;
+    }
+
+    .main-containerr {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+        margin-right: -65px;
+    }
+
+    .first-row,
+    .second-row,
+    .third-row {
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+    }
+
+    .box-1, .box-6 {
+        width: 100%;
+        height: 200px;
+    }
+
+    .box-2, .box-3, .box-4, .box-5, .box-7, .box-8, .box-9 {
+        width: 100%;
+        height: 200px;
+    }
+
+    .box-5 {
+        height: 411px;
+    }
+
+    .box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+@media (max-width: 768px) {
+    .main-containerr,
+    .first-row,
+    .second-row,
+    .third-row {
+        display: none;
+    }
+
+    .carousell {
+        display: block;
+    }
+    .slick-slide img
+{
+    display: block;
+    overflow: hidden;
+}
+
+}

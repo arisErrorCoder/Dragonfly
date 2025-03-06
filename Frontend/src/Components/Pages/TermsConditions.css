@@ -1,0 +1,56 @@
+/* Container */
+.terms-conditions-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
+  color: #333;
+  line-height: 1.6;
+  font-family: Arial, sans-serif;
+}
+
+/* Header */
+.terms-conditions-container h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+/* Date */
+.terms-conditions-container p strong {
+  font-size: 0.9rem;
+  color: #777;
+  display: block;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Section Titles */
+.terms-conditions-container h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-top: 30px;
+  color: #050709;
+}
+
+/* Paragraph */
+.terms-conditions-container p {
+  margin-bottom: 1.5rem;
+  text-align: justify;
+}
+
+/* Contact Information */
+.terms-conditions-container p:last-of-type {
+  margin-bottom: 0;
+}
+
+.terms-conditions-container p a {
+  color: #02070d;
+  text-decoration: none;
+}
+
+.terms-conditions-container p a:hover {
+  text-decoration: underline;
+}

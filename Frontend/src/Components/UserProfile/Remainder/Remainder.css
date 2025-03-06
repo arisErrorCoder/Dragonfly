@@ -1,0 +1,191 @@
+/* Container Styling */
+.remainder-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* padding: 40px; */
+    background-color: #f4f4f4;
+    min-height: 100vh;
+    font-family: 'Roboto', sans-serif;
+  }
+  
+  /* Main Flexbox Layout */
+  .calendar-and-reminders {
+    display: flex;
+    flex-direction: column; /* Change to row for larger screens */
+    justify-content: space-between;
+    width: 100%;
+    /* max-width: 1200px; */
+    background-color: white;
+    /* box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); */
+    /* border-radius: 10px; */
+    overflow: hidden;
+  }
+  
+  /* Reminder List Section */
+  .reminders-content {
+    flex: 1;
+    padding: 20px;
+    border-right: 1px solid #e0e0e0;
+    background-color: #f9f9f9;
+  }
+  
+  .reminders-content h2 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 15px;
+  }
+  
+  .reminder-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+    max-height: 400px;
+  }
+  
+  .reminder-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 10px;
+    background-color: #fff;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: background-color 0.2s ease;
+  }
+  
+  .reminder-list li:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .reminder-list li strong {
+    font-size: 18px;
+    color: #333;
+  }
+  
+  .reminder-list button {
+    background-color: #f05454;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .reminder-list button:hover {
+    background-color: #d04545;
+  }
+  
+  /* Reminder Form Section */
+  .reminder-form {
+    flex: 1;
+    padding: 20px;
+    background-color: white;
+  }
+  
+  .reminder-form h2 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  .reminder-form select, .reminder-form input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: #fafafa;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .reminder-form button {
+    background-color: transparent;
+    color: black;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+  }
+  
+  .reminder-form button:hover {
+    background-color: #45a049;
+  }
+  
+  /* Calendar Styling */
+  .react-calendar {
+    width: 100%;
+    background-color: #f3f0f0;
+    border: none;
+    border-radius: 15px;
+    font-family: 'Roboto', sans-serif;
+    margin-bottom: 20px;
+  }
+  
+  .react-calendar__tile {
+    position: relative;
+    background: none;
+    border-radius: 8px;
+    padding: 10px;
+  }
+  
+  .react-calendar__tile--active {
+    background-color: #3e64ff;
+    color: white;
+    border-radius: 8px;
+  }
+  
+  .react-calendar__tile--active:hover {
+    background-color: #2a47d5;
+  }
+  
+  .react-calendar__tile:hover {
+    background-color: #f0f0f0;
+  }
+  
+  /* Circle Marker for Dates with Reminders */
+  .circle-marker {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #f05454;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+  }
+  
+  /* Scrollable list for reminders */
+  .reminder-list {
+    overflow-y: auto;
+    max-height: 350px;
+  }
+  .remainder-container .add-btn {
+    background-color: green;
+    color: white;
+  }
+  /* Media Queries for Responsive Design */
+  @media (min-width: 768px) {
+    .calendar-and-reminders {
+      flex-direction: row; /* Align in a row for larger screens */
+    }
+  
+    .reminders-content {
+      padding: 30px;
+      border-right: 1px solid #ddd;
+    }
+  
+    .reminder-form {
+      padding: 30px;
+    }
+  
+    .reminder-list li {
+      padding: 20px;
+    }
+  }
+  

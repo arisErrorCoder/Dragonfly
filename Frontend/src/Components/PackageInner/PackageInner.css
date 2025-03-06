@@ -1,0 +1,303 @@
+.image-gallery-container {
+    display: flex;               /* Use flexbox for layout */
+    flex-direction: row;        /* Align items horizontally */
+    align-items: flex-start;    /* Align items to the top */
+    gap: 20px;                  /* Space between left and right sections */
+    padding: 20px;              /* Padding around the container */
+  }
+  
+  .image-preview {
+    flex: 1;                    /* Take available space for the main image */
+    max-width: 500px;          /* Set a max width for the image preview */
+  }
+  
+  .image-preview img {
+    width: 100%;               /* Make image responsive */
+    border-radius: 10px;       /* Optional: rounded corners for image */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* Optional: subtle shadow */
+  }
+  
+  .image-thumbnails {
+    display: flex;              /* Align thumbnails in a row */
+    gap: 10px;                  /* Space between thumbnails */
+    margin-top: 10px;          /* Space above thumbnails */
+  }
+  
+  .image-thumbnails img {
+    width: 80px;               /* Fixed width for thumbnails */
+    height: 80px;              /* Fixed height for thumbnails */
+    cursor: pointer;           /* Change cursor to pointer */
+    border-radius: 5px;       /* Optional: rounded corners for thumbnails */
+    transition: transform 0.2s; /* Smooth transform on hover */
+  }
+  
+  .image-thumbnails img:hover {
+    transform: scale(1.1);     /* Slightly enlarge thumbnail on hover */
+  }
+  
+  .product-details {
+    margin: 5px auto;
+    flex: 1;                   /* Take available space for product details */
+    max-width: 500px;         /* Set a max width for the details */
+  }
+  
+  .product-details h1 {
+    font-size: 24px;          /* Title size */
+    margin-bottom: 10px;      /* Space below title */
+  }
+  
+  .product-details h2 {
+    font-size: 18px;          /* Subtitle size */
+    color: #666;              /* Subtitle color */
+    margin-bottom: 15px;      /* Space below subtitle */
+  }
+  
+  .price {
+    font-size: 20px;          /* Price size */
+    font-weight: bold;        /* Bold font for price */
+    color: #b12704;           /* Price color */
+    margin-bottom: 15px;      /* Space below price */
+  }
+  
+  .ratings {
+    display: flex;            /* Align stars and reviews inline */
+    align-items: center;      /* Center vertically */
+    margin-bottom: 15px;      /* Space below ratings */
+  }
+  
+  .ratings span {
+    margin-right: 10px;       /* Space between stars and reviews */
+  }
+  
+  .actions {
+    display: flex;            /* Align action buttons in a row */
+    gap: 10px;               /* Space between buttons */
+    margin-bottom: 15px;      /* Space below actions */
+  }
+  
+  .actions button {
+    padding: 10px 15px;       /* Padding inside buttons */
+    border: none;             /* Remove default button border */
+    border-radius: 5px;       /* Rounded corners for buttons */
+    cursor: pointer;          /* Change cursor to pointer */
+    transition: background-color 0.2s; /* Smooth background transition */
+  }
+  
+  .actions button:hover {
+    background-color: #f0f0f0; /* Change background on hover */
+  }
+  
+  .description {
+    font-size: 14px;          /* Description font size */
+    line-height: 1.5;         /* Line height for readability */
+    color: #333;              /* Description color */
+  }
+  
+.carousel-section{
+    display: none;
+}
+
+  @media (max-width:768px) {
+    .image-thumbnails{
+        display: none;
+    }
+    
+  }
+  /* Main Styles */
+.gallery-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  .preview-section {
+    flex: 1;
+    max-width: 500px;
+    height: 350px;
+  }
+  
+  .preview-section img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .thumbnail-section {
+    display: flex;
+    flex-direction: column;
+    margin: auto 0px;
+    /* align-items: center; */
+    /* justify-content: space-between; */
+    gap: 10px;
+    /* margin-top: 10px; */
+  }
+  
+  .thumbnail-section img {
+    width: 80px;
+    height: 80px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: transform 0.2s;
+  }
+  
+  .thumbnail-section img:hover {
+    transform: scale(1.1);
+  }
+  
+  .details-wrapper {
+    flex: 1;
+    margin: auto 20px;
+    max-width: 500px;
+  }
+  
+  .details-wrapper h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  
+  .details-wrapper h4 {
+    font-size: 18px;
+    color: #666;
+    margin-bottom: 15px;
+  }
+  
+  .product-pricee {
+    font-size: 20px;
+    text-align: start;
+    font-weight: bold;
+    color: #b12704;
+    margin-bottom: 15px;
+  }
+  
+  .rating-wrapper {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .rating-wrapper span {
+    margin-right: 10px;
+  }
+  
+  .button-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .button-actions button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+ 
+  .product-description {
+    font-size: 14px;
+    text-align: justify;
+    line-height: 1.5;
+    color: #333;
+  }
+  
+  /* Media Queries */
+  @media (max-width: 768px) {
+    .gallery-wrapper {
+      flex-direction: column; /* Stack elements vertically on smaller screens */
+      align-items: center; /* Center align the items */
+    }
+  
+    .preview-section {
+      max-width: 100%; /* Allow main image to take full width */
+      display: none;
+    }
+    .carousel-section{
+        display: block;
+    }
+    .thumbnail-section {
+        display: none;
+      flex-wrap: wrap; /* Allow thumbnails to wrap if there's not enough space */
+      justify-content: center; /* Center thumbnails */
+    }
+  
+    .thumbnail-section img {
+      width: 60px; /* Adjust thumbnail size for smaller screens */
+      height: 60px;
+    }
+  
+    .details-wrapper {
+      max-width: 100%; /* Allow product details to take full width */
+      padding: 0 10px; /* Add padding for better spacing */
+    }
+  
+    .details-wrapper h1 {
+      font-size: 20px; /* Reduce font size for title */
+    }
+  
+    .details-wrapper h4 {
+      font-size: 16px; /* Reduce font size for subtitle */
+    }
+  
+    .product-price {
+      font-size: 18px; /* Reduce font size for price */
+    }
+  
+    .button-actions button {
+      flex: 1; /* Make buttons take equal space on smaller screens */
+    }
+  
+    .product-description {
+      font-size: 12px; /* Reduce font size for description */
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .thumbnail-section img {
+      width: 50px; /* Further reduce thumbnail size for very small screens */
+      height: 50px;
+    }
+  
+    .details-wrapper h1 {
+      font-size: 18px; /* Further reduce title font size */
+    }
+  
+    .details-wrapper h4 {
+      font-size: 14px; /* Further reduce subtitle font size */
+    }
+  
+    .product-price {
+      font-size: 16px; /* Further reduce price font size */
+    }
+  }
+  
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full viewport height */
+    background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+}
+
+.spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Ensures the image stays within bounds */
+}
+
+.spinner-image {
+    width: 60px; /* Set the width of the image */
+    height: 60px; /* Set the height of the image */
+    animation: spin 2s linear infinite; /* Spin animation */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

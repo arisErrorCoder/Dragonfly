@@ -1,0 +1,85 @@
+/* EditPage.css */
+
+.edit-profile-containerr {
+    margin: 0 auto;
+    padding: 20px;
+    width: 100%;
+    overflow-y: scroll;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.edit-profile-containerr h4 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #333;
+}
+
+.edit-profile-containerr .success-message {
+    color: #28a745;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.edit-profile-containerr.profile-edit-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.edit-profile-containerr .form-group {
+    margin-bottom: 15px;
+}
+
+.edit-profile-containerr .form-group label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+.edit-profile-containerr .form-group input[type="text"],
+.edit-profile-containerr .form-group input[type="email"],
+.edit-profile-containerr .form-group input[type="date"],
+.edit-profile-containerr .form-group input[type="tel"],
+.edit-profile-containerr .form-group select,
+.edit-profile-containerr .form-group input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    color: #333;
+}
+
+.edit-profile-containerr .form-group input[type="file"] {
+    margin-top: 10px;
+}
+
+.edit-profile-containerr .profile-image-preview {
+    margin-top: 10px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.edit-profile-containerr .error-message {
+    color: #dc3545;
+    font-size: 12px;
+}
+
+.edit-profile-containerr button {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.edit-profile-containerr button:hover {
+    background-color: #0056b3;
+}

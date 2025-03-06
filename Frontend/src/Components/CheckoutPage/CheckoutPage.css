@@ -1,0 +1,146 @@
+/* CheckoutPage.css */
+
+.checkout-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  min-height: 100vh;
+  background-color: #f7f8fa;
+}
+
+.order-details {
+  width: 100%;
+  max-width: 600px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.order-details__header {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.section {
+  margin-bottom: 1.5rem;
+}
+
+.section__header {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 0.5rem;
+}
+
+.section__content,
+.guest-item p {
+  font-size: 1rem;
+  color: #666;
+  margin: 0.3rem 0;
+}
+
+.guest-list,
+.addons-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.guest-item,
+.addon-item {
+  padding: 0.8rem;
+  background-color: #f1f1f5;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.payment-button {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.payment-button__btn {
+  padding: 0.8rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background-color: #1a73e8;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.payment-button__btn:hover {
+  background-color: #155ab6;
+}
+
+.payment-button__btn:active {
+  background-color: #1348a1;
+}
+
+.error-message,
+.success-message {
+  font-size: 1rem;
+  color: #ff4c4c;
+  background-color: #ffeded;
+  padding: 0.8rem;
+  border-radius: 6px;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+/* Loading Spinner Styles */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: spin 1.5s linear infinite;
+}
+
+.spinner-image {
+  width: 60px;
+  height: 60px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .order-details {
+    padding: 1.5rem;
+  }
+
+  .order-details__header {
+    font-size: 1.3rem;
+  }
+
+  .section__header {
+    font-size: 1.1rem;
+  }
+
+  .payment-button__btn {
+    width: 100%;
+    padding: 0.8rem;
+  }
+}

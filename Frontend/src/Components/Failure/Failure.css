@@ -1,0 +1,74 @@
+.payment-failure-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+    padding: 20px;
+  }
+  
+  .payment-failure-card {
+    background: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 500px;
+    text-align: center;
+    color: #333333;
+  }
+  
+  .failure-icon {
+    font-size: 4rem;
+    color: #e63946;
+    margin-bottom: 20px;
+  }
+  
+  .payment-failure-card h1 {
+    font-size: 2rem;
+    color: #e63946;
+    margin-bottom: 10px;
+  }
+  
+  .payment-failure-card p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #555555;
+    margin-bottom: 20px;
+  }
+  
+  .payment-failure-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+  }
+  
+  .retry-button,
+  .support-button {
+    font-size: 1rem;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .retry-button {
+    background-color: #007bff;
+    color: #ffffff;
+  }
+  
+  .retry-button:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+  }
+  
+  .support-button {
+    background-color: #6c757d;
+    color: #ffffff;
+  }
+  
+  .support-button:hover {
+    background-color: #5a6268;
+    transform: scale(1.05);
+  }
+  
