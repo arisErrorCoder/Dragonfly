@@ -81,7 +81,7 @@ const CheckoutPage = ({ isGuest, setIsGuest }) => {
     setSuccess(null);
 
     try {
-      const response = await axios.post('https://dragonflybackend.onrender.com/create-order', {
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/create-order`, {
         name: orderDetails.billingName,
         mobileNumber: orderDetails.billingPhone,
         amount: orderDetails.totalPrice,
@@ -89,7 +89,7 @@ const CheckoutPage = ({ isGuest, setIsGuest }) => {
         userId,
         email,
       });
-
+    
       if (response.data.url) {
         localStorage.removeItem('bookingOrderDetails');
         window.location.href = response.data.url;
@@ -98,6 +98,7 @@ const CheckoutPage = ({ isGuest, setIsGuest }) => {
       setError('Failed to initiate payment');
       setLoading(false);
     }
+    
   };
 
   const formatTime = (seconds) => {

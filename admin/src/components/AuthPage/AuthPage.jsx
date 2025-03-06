@@ -7,8 +7,8 @@ const AuthPage = ({ onLogin }) => {
   const [error, setError] = useState('');
 
   // Sample credentials for validation
-  const SAMPLE_USER = 'admin@dragonfly';
-  const SAMPLE_PASSWORD = 'password@855';
+  const SAMPLE_USER = import.meta.env.VITE_ADMIN_USER;
+  const SAMPLE_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD;
 
   const handleLogin = () => {
     // Validate username and password
