@@ -5,34 +5,37 @@ const cors = require("cors");
 const { v4: uuidv4 } = require('uuid');
 const admin = require('firebase-admin');
 const nodemailer = require('nodemailer'); // Import Nodemailer
+const dotenv = require('dotenv');
 
 const app = express();
 
 app.use(express.json());
 app.use(cors());
+dotenv.config();
 
 // Initialize Firebase Admin SDK with your credentials
-const serviceAccount = require('./firebase-service-account.json');
+const serviceAccount = require('./firebase-service-account');
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: 'https://dragonfly-958be-default-rtdb.firebaseio.com'
+  databaseURL: process.env.DATABASEURL
 });
 
-const MERCHANT_KEY = "96434309-7796-489d-8924-ab56988a6076";
-const MERCHANT_ID = "PGTESTPAYUAT86";
-const MERCHANT_BASE_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay";
-const MERCHANT_STATUS_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status";
+const MERCHANT_KEY = process.env.MERCHANT_KEY;
+const MERCHANT_ID = process.env.MERCHANT_ID;
+const MERCHANT_BASE_URL = process.env.MERCHANT_BASE_URL;
+const MERCHANT_STATUS_URL = process.env.MERCHANT_STATUS_URL;
 
-const redirectUrl = "https://dragonflybackend.onrender.com/status";
-const successUrl = "https://hoteldragonfly.netlify.app/confirmation";
-const failureUrl = "https://hoteldragonfly.netlify.app/payment-failure";
+const redirectUrl = process.env.REDIRECT_URL;
+const successUrl = process.env.SUCCESS_URL;
+const failureUrl = process.env.FAILURE_URL;
+
 
 // Set up Nodemailer transport
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'lecotrus2019@gmail.com',
-        pass: 'ubrv oyyg jqlm xoka'   // Replace with your email password or app-specific password
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS  // Use environment variables instead of hardcoding
     }
 });
 
@@ -178,7 +181,7 @@ const sendOrderEmails = (orderData, isSuccess) => {
         : 'Payment Failed - Your Order Details';
 
     const userMailOptions = {
-        from: 'lecotrus2019@gmail.com',
+        from: process.env.EMAIL_USER,
         to: email,
         subject,
         html: `
