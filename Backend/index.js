@@ -6,7 +6,6 @@ const { v4: uuidv4 } = require('uuid');
 const admin = require('firebase-admin');
 const nodemailer = require('nodemailer'); // Import Nodemailer
 const dotenv = require('dotenv');
-
 const app = express();
 
 app.use(express.json());
@@ -17,25 +16,24 @@ dotenv.config();
 const serviceAccount = require('./firebase-service-account');
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: process.env.DATABASEURL
+  databaseURL: 'https://dragonfly-958be-default-rtdb.firebaseio.com'
 });
 
-const MERCHANT_KEY = process.env.MERCHANT_KEY;
-const MERCHANT_ID = process.env.MERCHANT_ID;
-const MERCHANT_BASE_URL = process.env.MERCHANT_BASE_URL;
-const MERCHANT_STATUS_URL = process.env.MERCHANT_STATUS_URL;
+const MERCHANT_KEY = "96434309-7796-489d-8924-ab56988a6076";
+const MERCHANT_ID = "PGTESTPAYUAT86";
+const MERCHANT_BASE_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay";
+const MERCHANT_STATUS_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status";
 
-const redirectUrl = process.env.REDIRECT_URL;
-const successUrl = process.env.SUCCESS_URL;
-const failureUrl = process.env.FAILURE_URL;
-
+const redirectUrl = "https://dragonflybackend.onrender.com/status";
+const successUrl = "https://hoteldragonfly.netlify.app/confirmation";
+const failureUrl = "https://hoteldragonfly.netlify.app/payment-failure";
 
 // Set up Nodemailer transport
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS  // Use environment variables instead of hardcoding
+        user: 'lecotrus2019@gmail.com',
+        pass: 'ubrv oyyg jqlm xoka'   // Replace with your email password or app-specific password
     }
 });
 
@@ -181,7 +179,7 @@ const sendOrderEmails = (orderData, isSuccess) => {
         : 'Payment Failed - Your Order Details';
 
     const userMailOptions = {
-        from: process.env.EMAIL_USER,
+        from: 'lecotrus2019@gmail.com',
         to: email,
         subject,
         html: `

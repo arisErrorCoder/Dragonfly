@@ -3,7 +3,7 @@ const serviceAccount = require('./firebase-service-account');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: process.env.DATABASEURL
+  databaseURL: 'https://dragonfly-958be-default-rtdb.firebaseio.com/'
 });
 
 const db = admin.firestore();
