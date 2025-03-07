@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import { useNavigate } from 'react-router-dom';  
-import './Notification-mobile.css'; 
 import { fireDB } from '../../Login/firebase'; // Firebase import
 import { collection, query, where, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth'; // For getting current logged-in user
+import './Notification-Mobile.css'; 
 
 const NotificationItem = ({ notification, onDelete }) => {
   const handlers = useSwipeable({
