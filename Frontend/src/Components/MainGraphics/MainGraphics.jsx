@@ -1,15 +1,15 @@
 import React from 'react';
 import './MainGraphics.css';
-import lineart from '../../Assets/line art.jpg';
-import pebbleart from '../../Assets/pebble art.jpg';
-import decorations from '../../Assets/decoration.jpg';
-import stays from '../../Assets/outdoorimg.jpg';
-import dining from '../../Assets/dining.jpg';
-import rooftop from '../../Assets/rooftop.jpg';
-import birthdays from '../../Assets/birthdays.jpg';
-import anniversary from '../../Assets/anniversary.jpg';
-import proposal from '../../Assets/proposal.jpg';
-import moviedate from '../../Assets/movie date.jpg';
+import lineart from '../../assets/line art.jpg';
+import pebbleart from '../../assets/pebble art.jpg';
+import decorations from '../../assets/decoration.jpg';
+import stays from '../../assets/outdoorimg.jpg';
+import dining from '../../assets/dining.jpg';
+import rooftop from '../../assets/rooftop.jpg';
+import birthdays from '../../assets/birthdays.jpg';
+import anniversary from '../../assets/anniversary.jpg';
+import proposal from '../../assets/proposal.jpg';
+import moviedate from '../../assets/movie date.jpg';
 import { useNavigate } from 'react-router-dom';
 
 const MainGraphics = () => {
