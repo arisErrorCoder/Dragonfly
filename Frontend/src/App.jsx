@@ -5,7 +5,6 @@ import {BrowserRouter, Route, Routes} from "react-router-dom"
 import SuprisePlannerHome from './Components/SuprisePlannerHome/SuprisePlannerHome'
 import SuprisePInnerPage from './Components/SuprisePInnerPage/SuprisePInnerPage'
 import BookingConfirmation from './Components/Bookingconfirm/BookingConfirmation'
-import PaymentPage from './Components/PaymentPage/PaymentPage'
 import DiningBooking from './Components/Dining/DiningBooking'
 import DiningInnerPage from './Components/Dining/DiningInnerPage'
 import DragonflyHotel from './Components/DragonflyRooms/DrgonflyHotel'
@@ -84,7 +83,6 @@ function Success() {
             <Route path="/privacy-cookies" element={<PrivacyCookies />} /> 
             <Route path="/terms-and-conditions" element={<TermsConditions />} /> 
             <Route path="/checkout" element={<CheckoutPage isGuest={isGuest} setIsGuest={setIsGuest} />} /> 
-            <Route path="/paymentpage" element={<PaymentPage />} /> 
             <Route path="/payment-success" element={<Success />} />
             <Route path="/payment-failure" element={<Failure />} />
             <Route path="/about-us" element={<AboutUs />} />
