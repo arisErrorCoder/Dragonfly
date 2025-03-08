@@ -16,24 +16,27 @@ dotenv.config();
 const serviceAccount = require('./firebase-service-account');
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: 'https://dragonfly-958be-default-rtdb.firebaseio.com'
+  databaseURL: process.env.DATABASEURL
 });
 
-const MERCHANT_KEY = "96434309-7796-489d-8924-ab56988a6076";
-const MERCHANT_ID = "PGTESTPAYUAT86";
-const MERCHANT_BASE_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay";
-const MERCHANT_STATUS_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status";
 
-const redirectUrl = "https://dragonflybackend.onrender.com/status";
-const successUrl = "https://hoteldragonfly.netlify.app/confirmation";
-const failureUrl = "https://hoteldragonfly.netlify.app/payment-failure";
+const MERCHANT_ID = process.env.MERCHANT_ID;
+const MERCHANT_KEY = process.env.MERCHANT_KEY;
+const MERCHANT_BASE_URL = process.env.MERCHANT_BASE_URL;
+const MERCHANT_STATUS_URL = process.env.MERCHANT_STATUS_URL;
+
+const redirectUrl = process.env.REDIRECT_URL;
+const successUrl = process.env.SUCCESS_URL;
+const failureUrl = process.env.FAILURE_URL;
 
 // Set up Nodemailer transport
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: "smtp.hostinger.com", // Hostinger SMTP server
+    port: 465, // Use 465 for SSL or 587 for TLS
+    secure: true, // true for 465, false for 587
     auth: {
-        user: 'lecotrus2019@gmail.com',
-        pass: 'ubrv oyyg jqlm xoka'   // Replace with your email password or app-specific password
+        user: process.env.EMAIL_USER, // Your Hostinger email
+        pass: process.env.EMAIL_PASS  // Your Hostinger email password
     }
 });
 
@@ -179,7 +182,7 @@ const sendOrderEmails = (orderData, isSuccess) => {
         : 'Payment Failed - Your Order Details';
 
     const userMailOptions = {
-        from: 'lecotrus2019@gmail.com',
+        from: process.env.EMAIL_USER,
         to: email,
         subject,
         html: `
@@ -199,8 +202,8 @@ const sendOrderEmails = (orderData, isSuccess) => {
     };
 
     const adminMailOptions = {
-        from: 'lecotrus2019@gmail.com',
-        to: 'arish6013@gmail.com',
+        from: process.env.EMAIL_USER,
+        to: process.env.EMAIL_USER,
         subject: `Order ${isSuccess ? 'Successful' : 'Failed'} - Order ID: ${productDetails.orderId}`,
         html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 10px; overflow: hidden;">
@@ -223,7 +226,7 @@ const sendOrderEmails = (orderData, isSuccess) => {
                     <h3 style="margin-top: 20px;">Action Required:</h3>
                     <p style="margin: 5px 0;">Please follow up with the customer if necessary.</p>
                     <div style="margin-top: 20px; text-align: center;">
-                        <a href="https://dragonflyadmin.netlify.app/" target="_blank" 
+                        <a href="https://admin.hoteldragonfly.in/" target="_blank" 
                            style="display: inline-block; padding: 10px 20px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
                             Go to Admin Panel
                         </a>
