@@ -8,7 +8,6 @@ import Megapackage from '../Megapackage/Megapackage';
 import Bestsellers from '../Bestsellers/Bestsellers';
 import Addons from '../Addons/Addons';
 import Moments from '../Moments/Moments';
-import Checkout from '../Payment/phonepe';
 function Home() {
   return (
     <div>
