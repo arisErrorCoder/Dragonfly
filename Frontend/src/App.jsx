@@ -68,7 +68,6 @@ function Success() {
             <Route path="/product-details" element={<SuprisePInnerPage />} />
             <Route path="/booking" element={<ReviewBooking isGuest={isGuest} setIsGuest={setIsGuest} />} />
             <Route path="/confirmation" element={<BookingConfirmation />} />
-            <Route path="/payment" element={<PaymentPage />} />
             <Route path="/Dining" element={<DiningBooking />} />
             <Route path="/dining-inner" element={<DiningInnerPage />} />
             <Route path="/suprise-planner-inner" element={<RomanticInnerPage />} />
