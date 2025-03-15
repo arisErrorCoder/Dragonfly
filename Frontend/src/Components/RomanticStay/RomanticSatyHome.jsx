@@ -174,7 +174,7 @@ const RomanticSatyHome = () => {
       </aside>
   
       <main className="restaurant-list">
-        <h1>Romantic Stay</h1>
+        <h1>Romantic Stays</h1>
         <div className="cards-container">
           {filterRestaurants().length > 0 ? (
             filterRestaurants().map((pkg) => (
