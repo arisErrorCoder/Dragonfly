@@ -12,7 +12,8 @@ app.use(express.json());
 dotenv.config();
 const allowedOrigins = [
     "https://hoteldragonfly.netlify.app",
-    "https://hoteldragonfly.in"
+    "https://hoteldragonfly.in",
+    "http://localhost:5174"
   ];
   
   app.use(
@@ -134,8 +135,6 @@ app.post('/create-order', async (req, res) => {
     }
 });
 
-const authRoutes = require('./routes/authRoutes');
-app.use('/auth', authRoutes);
 
 
 // POST route to check payment status
