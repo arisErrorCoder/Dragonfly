@@ -9,9 +9,26 @@ const dotenv = require('dotenv');
 const app = express();
 
 app.use(express.json());
-app.use(cors());
 dotenv.config();
-
+const allowedOrigins = [
+    "https://hoteldragonfly.netlify.app",
+    "https://hoteldragonfly.in"
+  ];
+  
+  app.use(
+    cors({
+      origin: function (origin, callback) {
+        // allow requests with no origin (like mobile apps or curl)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) {
+          return callback(null, true);
+        } else {
+          return callback(new Error("Not allowed by CORS"));
+        }
+      },
+      credentials: true, // if you're using cookies or HTTP auth
+    })
+  );
 // Initialize Firebase Admin SDK with your credentials
 const serviceAccount = require('./firebase-service-account');
 admin.initializeApp({
