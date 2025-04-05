@@ -31,14 +31,28 @@ const failureUrl = process.env.FAILURE_URL;
 
 // Set up Nodemailer transport
 const transporter = nodemailer.createTransport({
-    host: "smtp.hostinger.com", // Hostinger SMTP server
-    port: 465, // Use 465 for SSL or 587 for TLS
-    secure: true, // true for 465, false for 587
+    host: 'smtp.hostinger.com', // Official hostname (not IP)
+    port: 465,
+    secure: true, // Mandatory for port 465
     auth: {
-        user: process.env.EMAIL_USER, // Your Hostinger email
-        pass: process.env.EMAIL_PASS  // Your Hostinger email password
+      user: process.env.SMTP_USER, // Full email (user@yourdomain.com)
+      pass: process.env.SMTP_PASS // Email account password
+    },
+    tls: {
+      rejectUnauthorized: false // Bypass certificate validation (temporary)
+    },
+    connectionTimeout: 30000,
+    socketTimeout: 30000
+  });
+  
+  // Verify connection on startup
+  transporter.verify((error, success) => {
+    if (error) {
+      console.error('SMTP Connection Error:', error);
+    } else {
+      console.log('SMTP Server is ready');
     }
-});
+  });
 
 // POST route to create an order
 app.post('/create-order', async (req, res) => {
@@ -102,6 +116,10 @@ app.post('/create-order', async (req, res) => {
         res.status(500).json({ error: 'Failed to initiate payment' });
     }
 });
+
+const authRoutes = require('./routes/authRoutes');
+app.use('/auth', authRoutes);
+
 
 // POST route to check payment status
 app.post('/status', async (req, res) => {
@@ -245,6 +263,228 @@ const sendOrderEmails = (orderData, isSuccess) => {
         if (err) console.log('Error sending admin email:', err);
     });
 };
+
+
+
+app.post('/api/send-verification', async (req, res) => {
+  try {
+    const { email, name, verificationLink } = req.body;
+
+    // Send verification email
+    await transporter.sendMail({
+        from: `"HotelDragonFly" <${process.env.SMTP_FROM_EMAIL}>`,
+        to: email,
+        subject: 'Verify Your Email Address',
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Email Verification</title>
+            <style>
+              body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+              }
+              .header {
+                text-align: center;
+                padding: 20px 0;
+                border-bottom: 1px solid #eaeaea;
+              }
+              .logo {
+                max-width: 50px;
+                height: auto;
+              }
+              .content {
+                padding: 30px 20px;
+              }
+              h1 {
+                color: #2c3e50;
+                font-size: 24px;
+                margin-bottom: 20px;
+              }
+              p {
+                margin-bottom: 20px;
+                font-size: 16px;
+              }
+              .button {
+                display: inline-block;
+                padding: 12px 24px;
+                background-color: #4CAF50;
+                color: white !important;
+                text-decoration: none;
+                border-radius: 4px;
+                font-weight: bold;
+                margin: 20px 0;
+              }
+              .footer {
+                text-align: center;
+                padding: 20px;
+                font-size: 14px;
+                color: #7f8c8d;
+                border-top: 1px solid #eaeaea;
+              }
+              .social-links {
+                margin: 20px 0;
+                text-align: center;
+              }
+              .social-icon {
+                margin: 0 10px;
+                text-decoration: none;
+              }
+              @media only screen and (max-width: 600px) {
+                .content {
+                  padding: 20px 10px;
+                }
+                h1 {
+                  font-size: 20px;
+                }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <img src="https://hoteldragonfly.in/assets/logo-RpRHc0rZ.png" alt="Company Logo" class="logo">
+            </div>
+            
+            <div class="content">
+              <h1>Welcome to HotelDragonfly, ${name}!</h1>
+              <p>Thank you for registering with us. To complete your registration, please verify your email address by clicking the button below:</p>
+              
+              <div style="text-align: center;">
+                <a href="${verificationLink}" class="button">Verify Email Address</a>
+              </div>
+              
+              <p>If the button doesn't work, copy and paste this link into your browser:</p>
+              <p style="word-break: break-all; color: #3498db;">${verificationLink}</p>
+              
+              <p>This verification link will expire in 24 hours.</p>
+            </div>
+            
+            <div class="social-links">
+              <a href="https://www.facebook.com/DragonflyHotel/" class="social-icon">Facebook</a>
+              <a href="https://www.linkedin.com/authwall?trk=bf&trkInfo=AQH-oNLUxfK4DAAAAZYE6QQwC8HHHlTrehct3QXRTwYpoZ1AcaJMfm34LCr0OwXp9NFjB1y5CaW9s8Hc54PCl3XvncmVLnMUN2fXuM2o5z4G0eZ9LMjhwfZJ8NmPiKWh3ozLSIY=&original_referer=&sessionRedirect=https%3A%2F%2Fin.linkedin.com%2Fcompany%2Fhotel-dragonfly" class="social-icon">Linkedin</a>
+              <a href="https://www.instagram.com/dragonfly_hotel/" class="social-icon">Instagram</a>
+            </div>
+            
+            <div class="footer">
+              <p>If you didn't request this, please ignore this email.</p>
+              <p>&copy; ${new Date().getFullYear()} HotelDragonfly. All rights reserved.</p>
+              <p>
+                Your Company Address<br>
+                City, State ZIP Code<br>
+                <a href="mailto:surprises@hoteldragonfly.in">surprises@hoteldragonfly.in</a>
+              </p>
+            </div>
+          </body>
+          </html>
+        `,
+        // Optional: Add text version for email clients that don't support HTML
+        text: `
+          Welcome to Our App, ${name}!
+      
+          Please verify your email address by visiting this link:
+          ${verificationLink}
+      
+          If you didn't request this, please ignore this email.
+      
+          © ${new Date().getFullYear()} Your Company Name. All rights reserved.
+        `
+      });
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('Error sending verification email:', error);
+    res.status(500).json({ error: 'Failed to send verification email' });
+  }
+});
+
+app.get('/api/verify-email', async (req, res) => {
+    try {
+      const token = req.query.token;
+      const userRecord = await admin.auth().getUser(token);
+      
+      if (!userRecord) {
+        return res.status(400).json({ error: 'Invalid verification token' });
+      }
+      
+      // Get the name from the query parameters
+      const name = req.query.name || '';
+      
+      // Update user with email verification and display name
+      await admin.auth().updateUser(token, {
+        emailVerified: true,
+        displayName: name // Set the display name
+      });
+      
+      res.status(200).json({ 
+        success: true,
+        email: userRecord.email,
+        name: name // Return the name
+      });
+      
+    } catch (error) {
+      console.error('Error verifying email:', error);
+      res.status(500).json({ error: 'Failed to verify email' });
+    }
+  });
+
+app.post('/api/send-reset-email', async (req, res) => {
+  try {
+    const { email, resetLink } = req.body;
+
+    // Check if email exists in Firebase Auth
+    try {
+      await admin.auth().getUserByEmail(email);
+    } catch (error) {
+      // Don't reveal if email doesn't exist (security best practice)
+      return res.status(200).json({ success: true });
+    }
+
+    // Send reset email
+    await transporter.sendMail({
+      from: `"Your App Name" <${process.env.SMTP_FROM_EMAIL}>`,
+      to: email,
+      subject: 'Password Reset Request',
+      html: `
+        <h1>Password Reset</h1>
+        <p>We received a request to reset your password. Click the link below to reset it:</p>
+        <a href="${resetLink}">Reset Password</a>
+        <p>If you didn't request this, please ignore this email.</p>
+      `
+    });
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('Error sending reset email:', error);
+    res.status(500).json({ error: 'Failed to send reset email' });
+  }
+});
+
+app.post('/api/reset-password', async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    // Get user by email
+    const userRecord = await admin.auth().getUserByEmail(email);
+    
+    // Update password using Firebase Admin SDK
+    await admin.auth().updateUser(userRecord.uid, {
+      password: newPassword
+    });
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    res.status(500).json({ error: 'Failed to reset password' });
+  }
+});
+
 
 app.listen(4000, () => {
     console.log('Server is running on port 4000');
