@@ -14,7 +14,8 @@ const allowedOrigins = [
     "https://hoteldragonfly.netlify.app",
     "https://hoteldragonfly.in",
     "http://localhost:5173",
-    "http://localhost:4000"
+    "http://localhost:4000",
+    "https://dragonflybackend.onrender.com"
   ];
   
   app.use(
