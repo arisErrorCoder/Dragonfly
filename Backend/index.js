@@ -7,6 +7,8 @@ const admin = require('firebase-admin');
 const nodemailer = require('nodemailer'); // Import Nodemailer
 const dotenv = require('dotenv');
 const app = express();
+const emailRoutes = require('./routes/emailRoutes');
+const subscriptionRoutes = require('./routes/subscriptionRoutes');
 
 app.use(express.json());
 dotenv.config();
@@ -18,9 +20,12 @@ const allowedOrigins = [
     "https://dragonflybackend.onrender.com"
   ];
   
-  app.use(
-    cors()
-  );
+  app.use(cors());
+  
+
+  app.use('/api', emailRoutes);
+  app.use('/api', subscriptionRoutes);
+
 // Initialize Firebase Admin SDK with your credentials
 const serviceAccount = require('./firebase-service-account');
 admin.initializeApp({
@@ -63,11 +68,16 @@ const transporter = nodemailer.createTransport({
       console.log('SMTP Server is ready');
     }
   });
+
+  function generateOrderId() {
+    const randomNum = Math.floor(100000 + Math.random() * 900000); // 6-digit random number
+    return `HDF-${randomNum}`;
+  }
+
   // POST route to create an order
   app.post('/create-order', async (req, res) => {
       const { name, mobileNumber, amount, userId, productDetails, email } = req.body;
-      const orderId = uuidv4();
-  
+      const orderId = generateOrderId();  
       try {
           // First check room availability before proceeding
           if (productDetails.venue && productDetails.checkInDate && productDetails.timeSlot) {
@@ -155,19 +165,22 @@ const transporter = nodemailer.createTransport({
           const paymentUrl = response.data.data.instrumentResponse.redirectInfo.url;
   
           // Save order details to Firestore (in a pending state)
-          await db.collection('orders').doc(orderId).set({
-              name,
-              mobileNumber,
-              amount,
-              userId,
-              productDetails,
-              email,
-              status: 'pending',
-              createdAt: admin.firestore.FieldValue.serverTimestamp(),
-              venue: productDetails.venue || null,
-              checkInDate: productDetails.checkInDate || null,
-              timeSlot: productDetails.timeSlot || null
-          });
+         await db.collection('orders').doc(orderId).set({
+    name,
+    mobileNumber,
+    amount,
+    userId,
+    productDetails: {
+        ...productDetails,
+        orderId: orderId  // Add orderId to productDetails
+    },
+    email,
+    status: 'pending',
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    venue: productDetails.venue || null,
+    checkInDate: productDetails.checkInDate || null,
+    timeSlot: productDetails.timeSlot || null
+});
   
           res.status(200).json({ 
               msg: "OK", 
@@ -358,84 +371,357 @@ const transporter = nodemailer.createTransport({
   });
 // Function to send emails
 const sendOrderEmails = (orderData, isSuccess) => {
-    const { name, email, mobileNumber, amount, productDetails } = orderData;
+  const { 
+      name, 
+      email, 
+      mobileNumber, 
+      amount, 
+      productDetails, 
+      paymentDetails, 
+      checkInDate, 
+      createdAt, 
+      updatedAt 
+  } = orderData;
+  
+  // Improved date formatting
+  const formatDate = (dateString) => {
+      if (!dateString) return 'N/A';
+      
+      try {
+          const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
+          if (isNaN(date)) return 'Invalid Date';
+          
+          return date.toLocaleString('en-IN', {
+              weekday: 'short',
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+          });
+      } catch (e) {
+          return 'Invalid Date';
+      }
+  };
 
-    const addonItems = productDetails.addons && Array.isArray(productDetails.addons)
-        ? productDetails.addons.map(addon => `
-            <li style="display: flex; align-items: center; margin-bottom: 8px;">
-                <img src="${addon.image}" width="50" height="50" style="margin-right: 10px; border-radius: 5px;" />
-                <span>${addon.name} - ₹${addon.price}</span>
-            </li>
-          `).join('')
-        : '<p>No addons available</p>';
+  // Currency formatting
+  const formatCurrency = (amount) => {
+      return new Intl.NumberFormat('en-IN', {
+          style: 'currency',
+          currency: 'INR',
+          minimumFractionDigits: 2
+      }).format(amount);
+  };
 
-    const subject = isSuccess
-        ? 'Order Confirmation - Your Purchase Details'
-        : 'Payment Failed - Your Order Details';
+  // Prepare addons list
+  const addonItems = productDetails.addons && Array.isArray(productDetails.addons)
+      ? productDetails.addons.map(addon => `
+          <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #eee; vertical-align: top;">
+                  <img src="${addon.image}" width="50" height="50" style="border-radius: 5px; margin-right: 10px;" alt="${addon.name}">
+              </td>
+              <td style="padding: 8px; border-bottom: 1px solid #eee; vertical-align: top;">
+                  <strong>${addon.name}</strong><br>
+                  <span>${addon.description || 'No description'}</span>
+              </td>
+              <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right; vertical-align: top;">
+                  ${formatCurrency(addon.price)}
+              </td>
+          </tr>
+      `).join('')
+      : '<tr><td colspan="3" style="padding: 8px; text-align: center;">No addons selected</td></tr>';
 
-    const userMailOptions = {
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject,
-        html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
-                <h1 style="background-color: ${isSuccess ? '#4CAF50' : '#FF6347'}; color: white; padding: 10px; text-align: center;">
-                    ${isSuccess ? 'Thank you for your order' : 'Payment Failed'}, ${name}!
-                </h1>
-                <h3>Order ID: ${productDetails.orderId}</h3>
-                <h3>Total Amount: ₹${amount}</h3>
-                <p>We have ${isSuccess ? 'received your payment' : 'failed to process your payment'}.</p>
-                <h2>Package Details:</h2>
-                <p><strong>Package Name:</strong> ${productDetails.packageName}</p>
-                <img src="${productDetails.image}" alt="Product Image" width="80" height="80" />
-                <ul>${addonItems}</ul>
-            </div>
-        `
-    };
+  // Prepare guest details
+  const guestList = productDetails.guestDetails && Array.isArray(productDetails.guestDetails)
+      ? productDetails.guestDetails.map(guest => `
+          <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #eee;">${guest.name}</td>
+              <td style="padding: 8px; border-bottom: 1px solid #eee;">${guest.age} years</td>
+          </tr>
+      `).join('')
+      : '<tr><td colspan="2" style="padding: 8px; text-align: center;">No guest details provided</td></tr>';
 
-    const adminMailOptions = {
-        from: process.env.EMAIL_USER,
-        to: process.env.EMAIL_USER,
-        subject: `Order ${isSuccess ? 'Successful' : 'Failed'} - Order ID: ${productDetails.orderId}`,
-        html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 10px; overflow: hidden;">
-                <div style="background-color: #333; color: white; padding: 15px; text-align: center;">
-                    <h1>New Order Notification</h1>
-                </div>
-                <div style="padding: 20px;">
-                    <h3 style="color: #555;">Order Overview:</h3>
-                    <p style="margin: 5px 0;"><strong>Order ID:</strong> ${productDetails.orderId}</p>
-                    <p style="margin: 5px 0;"><strong>Customer Name:</strong> ${name}</p>
-                    <p style="margin: 5px 0;"><strong>Email:</strong> ${email}</p>
-                    <p style="margin: 5px 0;"><strong>Total Amount:</strong> ₹${amount}</p>
-                    <p style="margin: 15px 0; color: ${isSuccess ? '#4CAF50' : '#FF6347'};">
-                        ${isSuccess ? 'The payment was successfully processed.' : 'The payment failed.'}
-                    </p>
-                    <h3 style="margin-bottom: 10px;">Package Details:</h3>
-                    <p style="margin: 5px 0;"><strong>Package Name:</strong> ${productDetails.packageName}</p>
-                    <img src="${productDetails.image}" alt="Product Image" style="width: 100px; height: auto; margin: 10px 0; border-radius: 8px;"/>
-                    <ul style="list-style-type: disc; padding-left: 20px; color: #555; margin: 10px 0;">${addonItems}</ul>
-                    <h3 style="margin-top: 20px;">Action Required:</h3>
-                    <p style="margin: 5px 0;">Please follow up with the customer if necessary.</p>
-                    <div style="margin-top: 20px; text-align: center;">
-                        <a href="https://admin.hoteldragonfly.in/" target="_blank" 
-                           style="display: inline-block; padding: 10px 20px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
-                            Go to Admin Panel
-                        </a>
-                    </div>
-                </div>
-            </div>
-        `
-    };
-    
+  const subject = isSuccess
+      ? `Booking Confirmation - ${productDetails.packageName} (${productDetails.orderId})`
+      : `Payment Failed - ${productDetails.packageName} (${productDetails.orderId})`;
 
-    transporter.sendMail(userMailOptions, (err) => {
-        if (err) console.log('Error sending user email:', err);
-    });
+  // Payment method mapping
+  const getPaymentMethod = () => {
+      if (!paymentDetails?.data?.paymentInstrument) return 'N/A';
+      
+      const instrument = paymentDetails.data.paymentInstrument;
+      if (instrument.type === 'CARD') {
+          return `${instrument.cardType || 'Card'} (${instrument.type})`;
+      }
+      return instrument.type || 'N/A';
+  };
 
-    transporter.sendMail(adminMailOptions, (err) => {
-        if (err) console.log('Error sending admin email:', err);
-    });
+  // User Email Template
+  const userMailOptions = {
+      from: process.env.SMTP_FROM_EMAIL,
+      to: email,
+      subject,
+      html: `
+      <div style="font-family: Arial, sans-serif; max-width: 650px; margin: 0 auto; color: #333;">
+          <div style="background-color: ${isSuccess ? '#4CAF50' : '#FF6347'}; padding: 20px; text-align: center; color: white;">
+              <h1 style="margin: 0; font-size: 24px;">${isSuccess ? 'Booking Confirmed!' : 'Payment Failed'}</h1>
+              <p style="margin: 5px 0 0; font-size: 16px;">Order ID: ${productDetails.orderId}</p>
+          </div>
+          
+          <div style="padding: 20px; border-bottom: 1px solid #eee;">
+              <h2 style="color: #2c3e50; margin-top: 0;">Hello ${name},</h2>
+              <p style="margin-bottom: 20px;">${
+                  isSuccess ? 
+                  'Thank you for booking with Dragonfly Hotel. Your payment has been successfully processed.' : 
+                  paymentDetails?.message || 'We were unable to process your payment. Please try again or contact support.'
+              }</p>
+              
+              <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                  <h3 style="margin-top: 0; color: #2c3e50;">Booking Summary</h3>
+                  <table style="width: 100%; border-collapse: collapse;">
+                      <tr>
+                          <td style="padding: 8px 0; width: 40%;"><strong>Package:</strong></td>
+                          <td style="padding: 8px 0;">${productDetails.packageName}</td>
+                      </tr>
+                      <tr>
+                          <td style="padding: 8px 0;"><strong>Venue:</strong></td>
+                          <td style="padding: 8px 0;">${productDetails.venue}</td>
+                      </tr>
+                      <tr>
+                          <td style="padding: 8px 0;"><strong>Check-in Date:</strong></td>
+                          <td style="padding: 8px 0;">${formatDate(checkInDate)}</td>
+                      </tr>
+                      <tr>
+                          <td style="padding: 8px 0;"><strong>Time Slot:</strong></td>
+                          <td style="padding: 8px 0;">${productDetails.timeSlot}</td>
+                      </tr>
+                      <tr>
+                          <td style="padding: 8px 0;"><strong>Total Amount:</strong></td>
+                          <td style="padding: 8px 0;">${formatCurrency(amount)}</td>
+                      </tr>
+                      <tr>
+                          <td style="padding: 8px 0;"><strong>Payment Status:</strong></td>
+                          <td style="padding: 8px 0; color: ${isSuccess ? '#4CAF50' : '#FF6347'}; font-weight: bold;">
+                              ${paymentDetails?.message || 'N/A'}
+                          </td>
+                      </tr>
+                  </table>
+              </div>
+              
+              ${productDetails.guestDetails?.length ? `
+              <h3 style="color: #2c3e50;">Guest Details</h3>
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                  <thead>
+                      <tr style="background-color: #f5f5f5;">
+                          <th style="padding: 10px; text-align: left;">Name</th>
+                          <th style="padding: 10px; text-align: left;">Age</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      ${guestList}
+                  </tbody>
+              </table>
+              ` : ''}
+              
+              ${productDetails.addons?.length ? `
+              <h3 style="color: #2c3e50;">Add-ons Selected</h3>
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                  <thead>
+                      <tr style="background-color: #f5f5f5;">
+                          <th style="padding: 10px; text-align: left;">Item</th>
+                          <th style="padding: 10px; text-align: left;">Description</th>
+                          <th style="padding: 10px; text-align: right;">Price</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      ${addonItems}
+                  </tbody>
+              </table>
+              ` : ''}
+              
+              <div style="background-color: #f0f8ff; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                  <h3 style="margin-top: 0; color: #2c3e50;">Important Information</h3>
+                  <ul style="padding-left: 20px;">
+                      <li>Please arrive 15 minutes before your scheduled time</li>
+                      <li>Carry a valid ID proof for verification</li>
+                      <li>For any changes, please contact us at least 24 hours in advance</li>
+                      ${productDetails.specialRequest ? `<li>Special Request: ${productDetails.specialRequest}</li>` : ''}
+                  </ul>
+              </div>
+              
+              <div style="text-align: center; margin-top: 30px;">
+                  <a href="https://hoteldragonfly.in" style="display: inline-block; padding: 12px 24px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 4px; font-weight: bold;">Visit Our Website</a>
+              </div>
+          </div>
+          
+          <div style="padding: 20px; text-align: center; color: #777; font-size: 14px;">
+              <p>If you have any questions, please contact us at support@hoteldragonfly.in or call +91 9930216903</p>
+              <p>© ${new Date().getFullYear()} Dragonfly Hotel. All rights reserved.</p>
+          </div>
+      </div>
+      `
+  };
+
+  // Admin Email Template
+  const adminMailOptions = {
+      from: process.env.SMTP_FROM_EMAIL,
+      to: process.env.SMTP_FROM_EMAIL,
+      subject: `[${isSuccess ? 'SUCCESS' : 'FAILED'}] New Booking - ${productDetails.orderId}`,
+      html: `
+      <div style="font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; color: #333;">
+          <div style="background-color: ${isSuccess ? '#4CAF50' : '#FF6347'}; padding: 20px; text-align: center; color: white;">
+              <h1 style="margin: 0; font-size: 24px;">${isSuccess ? 'New Booking Received' : 'Payment Failed'}</h1>
+              <p style="margin: 5px 0 0; font-size: 16px;">Order ID: ${productDetails.orderId}</p>
+              <p style="margin: 5px 0 0; font-size: 14px;">Status: ${paymentDetails?.code || 'N/A'}</p>
+          </div>
+          
+          <div style="padding: 20px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                  <div style="flex: 1; margin-right: 20px;">
+                      <h3 style="color: #2c3e50; margin-top: 0;">Customer Details</h3>
+                      <table style="width: 100%; border-collapse: collapse;">
+                          <tr>
+                              <td style="padding: 8px 0; width: 40%;"><strong>Name:</strong></td>
+                              <td style="padding: 8px 0;">${name}</td>
+                          </tr>
+                          <tr>
+                              <td style="padding: 8px 0;"><strong>Email:</strong></td>
+                              <td style="padding: 8px 0;">${email}</td>
+                          </tr>
+                          <tr>
+                              <td style="padding: 8px 0;"><strong>Phone:</strong></td>
+                              <td style="padding: 8px 0;">${mobileNumber}</td>
+                          </tr>
+                             <tr>
+                              <td style="padding: 8px 0;"><strong>Booking Status:</strong></td>
+                              <td style="padding: 8px 0; color: ${isSuccess ? '#4CAF50' : '#FF6347'}; font-weight: bold;">
+                                  ${isSuccess ? 'Confirmed' : 'Payment Failed'}
+                              </td>
+                          </tr>
+                      </table>
+                  </div>
+                  
+                  <div style="flex: 1;">
+                      <h3 style="color: #2c3e50; margin-top: 0;">Payment Details</h3>
+                      <table style="width: 100%; border-collapse: collapse;">
+                          <tr>
+                              <td style="padding: 8px 0; width: 40%;"><strong>Amount:</strong></td>
+                              <td style="padding: 8px 0;">${formatCurrency(amount)}</td>
+                          </tr>
+                          <tr>
+                    <td style="padding: 8px 0;"><strong>Transaction ID:</strong></td>
+                    <td style="padding: 8px 0;">${paymentDetails?.transactionId || paymentDetails?.data?.transactionId || 'N/A'}</td>
+                          </tr>
+                          <tr>
+                    <td style="padding: 8px 0;"><strong>Payment Method:</strong></td>
+                    <td style="padding: 8px 0;">${paymentDetails?.paymentInstrument?.type || paymentDetails?.data?.paymentInstrument?.type || 'N/A'}</td>
+                          </tr>
+                          <tr>
+                    <td style="padding: 8px 0;"><strong>Payment Status:</strong></td>
+                    <td style="padding: 8px 0; color: ${isSuccess ? '#4CAF50' : '#FF6347'}; font-weight: bold;">
+                        ${paymentDetails?.code || paymentDetails?.status || 'N/A'} - ${paymentDetails?.message || paymentDetails?.statusMessage || 'N/A'}
+                    </td>
+                          </tr>
+                      </table>
+                  </div>
+              </div>
+              
+              <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                  <h3 style="margin-top: 0; color: #2c3e50;">Booking Details</h3>
+                  <table style="width: 100%; border-collapse: collapse;">
+                      <tr>
+                          <td style="padding: 8px 0; width: 30%;"><strong>Package:</strong></td>
+                          <td style="padding: 8px 0;">${productDetails.packageName}</td>
+                      </tr>
+                      <tr>
+                          <td style="padding: 8px 0;"><strong>Venue:</strong></td>
+                          <td style="padding: 8px 0;">${productDetails.venue}</td>
+                      </tr>
+                      <tr>
+                          <td style="padding: 8px 0;"><strong>Check-in Date:</strong></td>
+                          <td style="padding: 8px 0;">${formatDate(checkInDate)}</td>
+                      </tr>
+                      <tr>
+                          <td style="padding: 8px 0;"><strong>Time Slot:</strong></td>
+                          <td style="padding: 8px 0;">${productDetails.timeSlot}</td>
+                      </tr>
+                      <tr>
+                          <td style="padding: 8px 0;"><strong>Special Request:</strong></td>
+                          <td style="padding: 8px 0;">${productDetails.specialRequest || 'None'}</td>
+                      </tr>
+                  </table>
+              </div>
+              
+              <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                  ${productDetails.guestDetails?.length ? `
+                  <div style="flex: 1; margin-right: 20px;">
+                      <h3 style="color: #2c3e50; margin-top: 0;">Guest Details</h3>
+                      <table style="width: 100%; border-collapse: collapse;">
+                          <thead>
+                              <tr style="background-color: #f5f5f5;">
+                                  <th style="padding: 10px; text-align: left;">Name</th>
+                                  <th style="padding: 10px; text-align: left;">Age</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                              ${guestList}
+                          </tbody>
+                      </table>
+                  </div>
+                  ` : ''}
+                  
+                  ${productDetails.addons?.length ? `
+                  <div style="flex: 1;">
+                      <h3 style="color: #2c3e50; margin-top: 0;">Add-ons</h3>
+                      <table style="width: 100%; border-collapse: collapse;">
+                          <thead>
+                              <tr style="background-color: #f5f5f5;">
+                                  <th style="padding: 10px; text-align: left;">Item</th>
+                                  <th style="padding: 10px; text-align: right;">Price</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                              ${productDetails.addons.map(addon => `
+                              <tr>
+                                  <td style="padding: 8px; border-bottom: 1px solid #eee;">${addon.name}</td>
+                                  <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${formatCurrency(addon.price)}</td>
+                              </tr>
+                              `).join('')}
+                          </tbody>
+                          <tfoot>
+                              <tr>
+                                  <td style="padding: 8px; text-align: right; font-weight: bold;">Total:</td>
+                                  <td style="padding: 8px; text-align: right; font-weight: bold;">${formatCurrency(amount)}</td>
+                              </tr>
+                          </tfoot>
+                      </table>
+                  </div>
+                  ` : ''}
+              </div>
+              
+              <div style="text-align: center; margin-top: 30px;">
+                  <a href="https://admin.hoteldragonfly.in" style="display: inline-block; padding: 12px 24px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; margin-right: 10px;">View in Admin Panel</a>
+                  <a href="tel:${mobileNumber}" style="display: inline-block; padding: 12px 24px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 4px; font-weight: bold;">Call Customer</a>
+              </div>
+          </div>
+          
+          <div style="padding: 20px; text-align: center; color: #777; font-size: 14px; border-top: 1px solid #eee;">
+              <p>© ${new Date().getFullYear()} Dragonfly Hotel Admin</p>
+          </div>
+      </div>
+      `
+  };
+
+  // Send emails
+  transporter.sendMail(userMailOptions, (err) => {
+      if (err) console.error('Error sending user email:', err);
+      else console.log('User email sent for order:', productDetails.orderId);
+  });
+
+  transporter.sendMail(adminMailOptions, (err) => {
+      if (err) console.error('Error sending admin email:', err);
+      else console.log('Admin email sent for order:', productDetails.orderId);
+  });
 };
 
 
