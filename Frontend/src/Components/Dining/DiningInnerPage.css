@@ -456,7 +456,7 @@
 }
 
 .br-scroll-text {
-  font-size: 0.9rem;
+  font-size: 20px;
   margin-bottom: 8px;
   font-weight: 500;
 }
@@ -475,4 +475,13 @@
   60% {
     transform: translateY(-3px);
   }
+}
+.br-scroll-text {
+  font-weight: bold;
+}
+
+.br-scroll-text span {
+  color: #000000;
+  font-weight: bold;
+  text-transform: uppercase;
 }

@@ -66,7 +66,7 @@ const Footer = () => {
             <h4>THE HOTEL</h4>
             <FontAwesomeIcon icon={isCompanyOpen ? faChevronUp : faChevronRight} className="toggle-icon" />
           </div>
-          <ul className={`company ${isCompanyOpen ? 'open' : ''}`}>
+          <ul className={`company ${isCompanyOpen ? '' : 'open'}`}>
             <Link to="/about-us"><li>ABOUT US</li></Link>
             <Link to="/RomanticStays"><li>ROMANTIC STAYS</li></Link>
             <Link to="/Dining"><li>ROMANTIC DINING</li></Link>
@@ -79,7 +79,7 @@ const Footer = () => {
             <h4>NEED HELP</h4>
             <FontAwesomeIcon icon={isHelpOpen ? faChevronUp : faChevronRight} className="toggle-icon" />
           </div>
-          <ul className={`help-links ${isHelpOpen ? 'open' : ''}`}>
+          <ul className={`help-links ${isHelpOpen ? '' : 'open'}`}>
             <Link to="/contact-us"><li>CONTACT US</li></Link>
             <Link to="/faqs"><li>FAQ'S</li></Link>
           </ul>
@@ -90,7 +90,7 @@ const Footer = () => {
             <h4>LEGAL</h4>
             <FontAwesomeIcon icon={isLegalOpen ? faChevronUp : faChevronRight} className="toggle-icon" />
           </div>
-          <ul className={`discover-links ${isLegalOpen ? 'open' : ''}`}>
+          <ul className={`discover-links ${isLegalOpen ? '' : 'open'}`}>
             <Link to="/privacy-cookies"><li>PRIVACY & COOKIES</li></Link>
             <Link to="/terms-and-conditions"><li>TERMS AND CONDITIONS</li></Link>
           </ul>

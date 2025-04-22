@@ -304,14 +304,17 @@ const handleFormSubmit = async (e) => {
               ))}
             </Carousel>
           </div>
-          <h4>{pkg.description || 'Designed to be a haven for the senses and an oasis of luxury.'}</h4>
-          <p className="product-pricee">₹{pkg.price}/-</p>
           <div className="rating-wrapper">
             <span>
               {[...Array(Math.round(averageRating))].map((_, i) => <i key={i} className="fa-solid fa-star"></i>)}
             </span>
             <span>{reviews.length} Reviews</span>
           </div>
+          <h4>{pkg.description || 'Designed to be a haven for the senses and an oasis of luxury.'}</h4>
+          <p className="product-description">
+          {pkg.best_for}
+          </p>
+          <p className="product-pricee">₹{pkg.price}/-</p>
           <div className="button-actions">
             <a href="tel:9944894722" className="call">
               <button>
@@ -324,19 +327,19 @@ const handleFormSubmit = async (e) => {
               </button>
             </a>
           </div>
-          <p className="product-description">
-          {pkg.best_for}
-          </p>
+
         </div>
       </div>
       <div className="br-scroll-note">
-  <p className="br-scroll-text">Scroll down to choose preferred addons and start Booking</p>
-  <div className="br-scroll-arrow">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M7 10L12 15L17 10" stroke="#4a5568" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  </div>
-</div>
+      <p className="br-scroll-text" style={{ fontWeight: 'bold' }}>
+        Scroll down to choose preferred addons and <span>Booking Now</span>
+      </p>
+      <div className="br-scroll-arrow">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 10L12 15L17 10" stroke="#4a5568" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+    </div>
       {/* Additional Information Cards */}
       <div className="Additional-Information-card-container">
         {cards.map((card, index) => (
@@ -378,7 +381,7 @@ const handleFormSubmit = async (e) => {
 
     <div style={{display:"flex",alignItems:"center",justifyContent:"center",margin:"10px 0px"}}>
   <button onClick={handleBookingPage} style={{padding:"10px 50px",fontSize:"17px",backgroundColor:"red"}}>
-    Go to Booking Page
+    Book Now
   </button>
 </div>
 

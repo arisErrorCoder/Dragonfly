@@ -178,10 +178,7 @@
     align-items: center;
     margin-bottom: 15px;
   }
-  
-  .rating-wrapper span {
-    margin-right: 10px;
-  }
+
   
   .button-actions {
     display: flex;
@@ -201,6 +198,7 @@
  
   .product-description {
     font-size: 14px;
+    padding: 10px 0px;
     text-align: justify;
     line-height: 1.5;
     color: #333;
@@ -308,7 +306,7 @@
 }
 
 .br-scroll-text {
-  font-size: 0.9rem;
+  font-size: 20px;
   margin-bottom: 8px;
   font-weight: 500;
 }
