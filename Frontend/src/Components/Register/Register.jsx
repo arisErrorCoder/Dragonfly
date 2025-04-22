@@ -25,7 +25,7 @@ const Register = () => {
         body: JSON.stringify({
           email: data.email,
           name: data.name,
-          verificationLink: `${import.meta.env.VITE_BACKEND_URL}/api/verify-email?token=${userCredential.user.uid}&name=${encodeURIComponent(data.name)}`
+          verificationLink: `https://hoteldragonfly.in/verify-email?token=${userCredential.user.uid}&name=${encodeURIComponent(data.name)}`
         }),
       });
 
