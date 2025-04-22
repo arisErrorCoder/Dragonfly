@@ -16,7 +16,7 @@ const VerifyEmail = () => {
     const verifyEmail = async () => {
       try {
         const name = searchParams.get('name') || '';
-        const response = await fetch(`https://api.hoteldragonfly.in/api/verify-email?token=${token}&name=${encodeURIComponent(name)}`);
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/verify-email?token=${token}&name=${encodeURIComponent(name)}`);
         
         if (!response.ok) throw new Error('Invalid or expired verification link');
         
