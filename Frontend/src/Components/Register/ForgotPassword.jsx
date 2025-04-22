@@ -14,14 +14,14 @@ const ForgotPassword = () => {
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/send-reset-email`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/send-reset-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           email: data.email,
-          resetLink: `${import.meta.env.VITE_BACKEND_URL}/reset-password?token=${encodeURIComponent(data.email)}`
+          resetLink: `${import.meta.env.VITE_BACKEND_URL}/api/reset-password?token=${encodeURIComponent(data.email)}`
         }),
       });
 

@@ -17,7 +17,7 @@ const Register = () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/send-verification`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/send-verification`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -25,7 +25,7 @@ const Register = () => {
         body: JSON.stringify({
           email: data.email,
           name: data.name,
-          verificationLink: `${import.meta.env.VITE_BACKEND_URL}/verify-email?token=${userCredential.user.uid}&name=${encodeURIComponent(data.name)}`
+          verificationLink: `${import.meta.env.VITE_BACKEND_URL}/api/verify-email?token=${userCredential.user.uid}&name=${encodeURIComponent(data.name)}`
         }),
       });
 
