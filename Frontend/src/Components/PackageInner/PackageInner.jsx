@@ -117,7 +117,13 @@ const PackageInner = () => {
                 },
                 {
                     title: "Cancellation and Refund Policy",
-                    content: "Details about cancellation and refund policy...",
+                    content: (
+                      <ul>
+                          {packageData.Cancellation_and_Refund_Policy?.map((item, index) => (
+                              <li className='cardss-li' key={index}>{item || ""}</li>
+                          ))}
+                      </ul>
+                  ),
                 },
                 {
                     title: "Other Useful Info",

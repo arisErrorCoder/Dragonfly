@@ -5,6 +5,7 @@ import { Line, Pie, Bar } from 'react-chartjs-2';
 import 'chart.js/auto';
 import './Dashboard.css';
 import Calendar from './Calendar/Calendar';
+import AdminTimeSlotsEditor from './AdminTimeSlotsEditor/AdminTimeSlotsEditor';
 
 const Dashboard = () => {
   const [totalSales, setTotalSales] = useState(0);
@@ -152,7 +153,6 @@ const Dashboard = () => {
             <Bar data={barChartData} />
           </div>
         </div>
-
       </main>
     </div>
   );

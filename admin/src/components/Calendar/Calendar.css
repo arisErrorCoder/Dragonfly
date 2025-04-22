@@ -1,335 +1,520 @@
-.calendar {
-  display: flex;
-  flex-direction: column;
-  font-family: Arial, sans-serif;
-  border: 1px solid #ccc;
-  margin: 20px;
-  margin-top: 55px;
-  max-width: 100%;
-}
+/* Luxury Calendar Styles */
 
-.calendar-header {
-  display: flex;
-  background-color: #f5f5f5;
-  font-weight: bold;
-  border-bottom: 1px solid #ccc;
-}
-
-.empty-space {
-  width: 150px;
-}
-
-.time-slot {
-  flex: 1;
-  text-align: center;
-  padding: 10px 0;
-  border-left: 1px solid #ccc;
-}
-
-.calendar-body {
-  display: flex;
-  flex-direction: column;
-}
-
-.venue-row {
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid #ccc;
-}
-
-.venue-name {
-  width: 150px;
-  padding: 10px;
-  text-align: left;
-  background-color: #f9f9f9;
-  border-right: 1px solid #ccc;
-}
-
-.time-cell {
-  flex: 1;
-  height: 40px;
-  border-left: 1px solid #ccc;
+.luxury-calendar-container {
+  width: 100%;
+  padding: 2rem;
   background-color: #fff;
-  position: relative;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
-.time-cell.booked {
-  background-color: #ffe6e6;
-}
-
-.time-cell.booked::before {
-  position: absolute;
-  top: 50%;
-  left: 10%;
-  right: 10%;
-  height: 2px;
-  background-color: transparent;
-  transform: translateY(-50%);
-}
-/* Navigation Arrows */
-.calendar-navigation {
+.luxury-calendar-loading {
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  align-items: center;
-  padding: 10px 0;
-  background-color: #f5f5f5;
-  border-bottom: 1px solid #ccc;
+  height: 300px;
+  color: #6c757d;
 }
 
-.calendar-navigation .arrow {
-  cursor: pointer;
-  font-size: 1.5rem;
-  padding: 0 20px;
-  user-select: none;
-}
-
-.calendar-navigation .current-date {
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin: 0 10px;
-}
-
-/* Adjust the existing calendar styles as needed */
-.calendar {
-  display: flex;
-  flex-direction: column;
-  font-family: Arial, sans-serif;
-  border: 1px solid #ccc;
-  overflow-x: auto;
-}
-
-.calendar-header {
-  display: flex;
-  background-color: #f5f5f5;
-  border-bottom: 1px solid #ccc;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-}
-
-.empty-space {
-  width: 150px;
-  text-align: center;
-  font-weight: bold;
-  padding: 10px 5px;
-  background-color: #f9f9f9;
-}
-
-.time-slot {
-  flex: 1;
-  text-align: center;
-  padding: 10px;
-  border-left: 1px solid #ccc;
-  min-width: 180px;
-  font-weight: bold;
-}
-
-.calendar-body {
-  display: flex;
-  flex-direction: column;
-}
-
-.venue-row {
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid #ccc;
-}
-
-.venue-name {
-  width: 150px;
-  padding: 10px;
-  text-align: left;
-  background-color: #f9f9f9;
-  border-right: 1px solid #ccc;
-  font-weight: bold;
-}
-
-.time-cell {
+.luxury-spinner {
+  width: 50px;
   height: 50px;
-  border-top: 1px solid #eee;
-  background-color: #fff;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #8b5a2b;
+  border-radius: 50%;
+  animation: luxury-spin 1s linear infinite;
+  margin-bottom: 1rem;
 }
 
-.time-cell.booked {
-  background-color: #ffe6e6;
-  position: relative;
+@keyframes luxury-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-.time-cell.booked::before {
-  position: absolute;
-  top: 50%;
-  left: 10%;
-  right: 10%;
-  height: 2px;
-  background-color: #ff0000;
-  transform: translateY(-50%);
+.luxury-calendar-header {
+  margin-bottom: 2rem;
 }
-.time-cell {
+
+.luxury-date-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.luxury-nav-button {
+  background: none;
+  border: none;
+  color: #8b5a2b;
   cursor: pointer;
-  padding: 10px;
-  text-align: center;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.booked {
-  background-color: #f5a623;
+.luxury-nav-button:hover {
+  background-color: rgba(139, 90, 43, 0.1);
+  transform: scale(1.1);
+}
+
+.luxury-current-date {
+  font-size: 1.5rem;
+  color: #343a40;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.luxury-date-icon {
+  color: #8b5a2b;
+}
+
+.luxury-section-title {
+  font-size: 1.2rem;
+  color: #495057;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.luxury-venue-selection {
+  margin-bottom: 2rem;
+}
+
+.luxury-venue-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.luxury-venue-card {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.luxury-venue-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  border-color: #8b5a2b;
+}
+
+.luxury-venue-card-active {
+  background-color: #f1e8e0;
+  border-color: #8b5a2b;
+  box-shadow: 0 5px 15px rgba(139, 90, 43, 0.1);
+}
+
+.luxury-venue-card h4 {
+  margin: 0 0 0.5rem 0;
+  color: #343a40;
+  font-size: 1.1rem;
+}
+
+.luxury-venue-card p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.luxury-calendar-main {
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.luxury-time-slots-header {
+  display: grid;
+  grid-template-columns: 150px repeat(auto-fit, minmax(200px, 1fr));
+  background-color: #8b5a2b;
   color: white;
+  padding: 1rem;
 }
 
-.manual-booked {
-  background-color: #325b0e;
-  color: white;
+.luxury-venue-label {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
 }
 
-.booking-section input {
-  display: block;
-  margin: 10px 0;
-  padding: 8px;
+.luxury-time-slot-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  padding: 0 0.5rem;
 }
 
-.booking-section button {
-  padding: 10px 20px;
-  background-color: #007bff;
+.luxury-time-icon {
+  flex-shrink: 0;
+}
+
+.luxury-availability-grid {
+  display: grid;
+}
+
+.luxury-availability-row {
+  display: grid;
+  grid-template-columns: 150px repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.luxury-time-slot {
+  padding: 1rem;
+  border-right: 1px solid #e9ecef;
+  border-bottom: 1px solid #e9ecef;
+  min-height: 120px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.luxury-time-slot:hover {
+  background-color: #f8f9fa;
+}
+
+.luxury-time-slot-available {
+  background-color: #f1f9f1;
+}
+
+.luxury-time-slot-partial {
+  background-color: #fff8e6;
+}
+
+.luxury-time-slot-booked {
+  background-color: #ffebee;
+  cursor: not-allowed;
+}
+
+.luxury-slot-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.luxury-slot-status {
+  margin-bottom: 0.5rem;
+}
+
+.luxury-slot-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.luxury-slot-badge-available {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.luxury-slot-badge-partial {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.luxury-slot-badge-full {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.luxury-booking-list {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.luxury-booking-item {
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+}
+
+.luxury-booking-item:hover {
+  transform: translateX(3px);
+}
+
+.luxury-booking-manual {
+  background-color: #e3f2fd;
+  color: #1565c0;
+  border-left: 3px solid #1976d2;
+}
+
+.luxury-booking-online {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-left: 3px solid #388e3c;
+}
+
+.luxury-booking-info-icon {
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.luxury-booking-item:hover .luxury-booking-info-icon {
+  opacity: 1;
+}
+
+/* Modal Styles */
+.luxury-booking-modal,
+.luxury-booking-details-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.luxury-booking-form,
+.luxury-booking-details {
+  background-color: white;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 500px;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  animation: luxury-modal-enter 0.3s ease-out;
+}
+
+@keyframes luxury-modal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.luxury-close-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.luxury-close-button:hover {
+  color: #343a40;
+  background-color: #f1f1f1;
+}
+
+.luxury-booking-title {
+  margin-top: 0;
+  color: #343a40;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.luxury-form-icon {
+  color: #8b5a2b;
+}
+
+.luxury-booking-slot {
+  color: #6c757d;
+  margin-top: -0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.luxury-form-group {
+  margin-bottom: 1.5rem;
+}
+
+.luxury-input-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #495057;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.luxury-input-icon {
+  color: #8b5a2b;
+}
+
+.luxury-form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.luxury-form-input:focus {
+  outline: none;
+  border-color: #8b5a2b;
+  box-shadow: 0 0 0 3px rgba(139, 90, 43, 0.1);
+}
+
+.luxury-confirm-button {
+  width: 100%;
+  padding: 1rem;
+  background-color: #8b5a2b;
   color: white;
   border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-}
-/* Style for cancelable manual booking */
-.time-cell.manual-booked {
-  background-color: #ffa726;
-  color: white;
-  cursor: pointer;
-  position: relative;
-}
-.time-cell.manual-booked:hover {
-  background-color: #fb8c00;
+  transition: all 0.3s;
+  margin-top: 1rem;
 }
 
-/* Close icon for confirm booking section */
-.booking-section {
-  position: relative;
-  padding: 20px;
-  border: 1px solid #ccc;
-  background: #f9f9f9;
-  margin-top: 20px;
-  border-radius: 5px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.luxury-confirm-button:hover {
+  background-color: #6d4522;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(139, 90, 43, 0.2);
 }
 
-.booking-section .close-icon {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 18px;
-  color: #888;
+/* Booking Details Styles */
+.luxury-details-title {
+  margin-top: 0;
+  color: #343a40;
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.luxury-details-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.luxury-details-row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  align-items: center;
+}
+
+.luxury-details-label {
+  font-weight: 600;
+  color: #495057;
+}
+
+.luxury-details-value {
+  color: #343a40;
+}
+
+.luxury-type-manual {
+  color: #1565c0;
+}
+
+.luxury-type-online {
+  color: #2e7d32;
+}
+
+.luxury-details-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.luxury-cancel-button {
+  flex: 1;
+  padding: 0.75rem;
+  background-color: #ffebee;
+  color: #c62828;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
   cursor: pointer;
-  transition: color 0.3s;
+  transition: all 0.3s;
 }
 
-.booking-section .close-icon:hover {
-  color: #444;
+.luxury-cancel-button:hover {
+  background-color: #ffcdd2;
 }
-/* Responsive Styles */
+
+.luxury-close-details-button {
+  flex: 1;
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+  color: #495057;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.luxury-close-details-button:hover {
+  background-color: #e9ecef;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+  .luxury-calendar-container {
+    padding: 1.5rem;
+  }
+  
+  .luxury-time-slots-header,
+  .luxury-availability-row {
+    grid-template-columns: 120px repeat(auto-fit, minmax(150px, 1fr));
+  }
+}
+
 @media (max-width: 768px) {
-  .empty-space,
-  .venue-name {
-    width: 100px;
-    font-size: 0.9rem;
-    text-align: center;
+  .luxury-calendar-container {
+    padding: 1rem;
   }
-
-  .time-slot {
-    min-width: 120px;
-    font-size: 0.9rem;
+  
+  .luxury-venue-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
-
-  .time-cell {
-    height: 40px;
+  
+  .luxury-time-slot-header {
+    font-size: 0.85rem;
+  }
+  
+  .luxury-booking-item {
     font-size: 0.8rem;
-    padding: 5px;
-  }
-
-  .calendar-header {
-    flex-wrap: wrap;
-    justify-content: space-around;
-  }
-
-  .calendar-body {
-    overflow-x: scroll;
-  }
-
-  .calendar {
-    margin: 10px;
-    border: none;
-  }
-
-  .calendar-navigation {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .calendar-navigation .arrow {
-    font-size: 1.2rem;
-    padding: 0 10px;
-  }
-
-  .calendar-navigation .current-date {
-    font-size: 1rem;
   }
 }
 
-@media (max-width: 425px) {
-  .empty-space,
-  .venue-name {
-    width: 80px;
-    font-size: 0.8rem;
-    text-align: center;
+@media (max-width: 576px) {
+  .luxury-time-slots-header,
+  .luxury-availability-row {
+    grid-template-columns: 100px repeat(auto-fit, minmax(120px, 1fr));
   }
-
-  .time-slot {
-    min-width: 100px;
-    font-size: 0.8rem;
+  
+  .luxury-time-slot {
+    padding: 0.75rem;
+    min-height: 100px;
   }
-
-  .time-cell {
-    height: 35px;
-    font-size: 0.7rem;
-    padding: 5px;
-  }
-
-  .calendar-header {
-    flex-wrap: wrap;
-    justify-content: space-between;
-  }
-
-  .calendar-body {
-    overflow-x: auto;
-    display: block;
-  }
-
-  .venue-row {
-    flex-wrap: wrap;
-  }
-
-  .booking-section input,
-  .booking-section button {
-    padding: 8px;
-    font-size: 0.8rem;
-  }
-
-  .booking-section button {
-    padding: 8px 15px;
-  }
-
-  .calendar-navigation {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .calendar-navigation .arrow {
-    font-size: 1rem;
-  }
-
-  .calendar-navigation .current-date {
-    font-size: 0.9rem;
+  
+  .luxury-booking-form,
+  .luxury-booking-details {
+    max-width: 90%;
+    padding: 1.5rem;
   }
 }

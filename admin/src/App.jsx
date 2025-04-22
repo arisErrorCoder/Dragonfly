@@ -12,6 +12,7 @@ import Bookingpage from './components/Booking/Bookingpage';
 import NotificationManager from './components/NotificationManager';
 import UpdateCoupon from './components/UpdateCoupon/UpdateCoupon';
 import AuthPage from './components/AuthPage/AuthPage';
+import VenueManagementSystem from './components/VenueManagement/VenueManagement';
 
 const App = () => {
   // Track user authentication state
@@ -64,6 +65,7 @@ const App = () => {
           {activeContent === 'booking' && <Bookingpage />}
           {activeContent === 'notification' && <NotificationManager />}
           {activeContent === 'coupon' && <UpdateCoupon />}
+          {activeContent === 'time' && <VenueManagementSystem />}
         </div>
       </div>
       <Routes>

@@ -65,6 +65,11 @@ const Sidebar = ({ onMenuClick, onLogout }) => {
                     <span className="text">Dining Packages</span>
                   </a>
                 </li>
+                <li className={activeMenu === 'time' ? 'active' : ''}>
+                  <a href="#" onClick={() => handleMenuItemClick('time')}>
+                    <span className="text">Time Slot and Room Availability</span>
+                  </a>
+                </li>
                 <li className={activeMenu === 'addons' ? 'active' : ''}>
                   <a href="#" onClick={() => handleMenuItemClick('addons')}>
                     <span className="text">Addons</span>

@@ -12,7 +12,6 @@ import RomanticSatyHome from './Components/RomanticStay/RomanticSatyHome'
 import PhotoGallery from './Components/PhotoGallery/PhotoGallery'
 import RomanticInnerPage from "./Components/RomanticStay/RomanticInnerPage"
 import Home from './Components/Home/Home'
-import AuthPage from './Components/Login/AuthPage'
 import ReviewBooking from './Components/ReviewBooking/ReviewBooking'
 import Sidebar from './Components/UserProfile/Sidebar/Sidebar'
 import BottomBar from './Components/UserProfile/BottomBar/BottomBar'
@@ -27,6 +26,12 @@ import ContactForm from './Components/Pages/ContactForm'
 import HoverButtons from './Components/HoverButtons/HoverButtons'
 import CartPage from './Components/CartPage/CartPage'
 import Failure from './Components/Failure/Failure'
+import { AuthProvider } from './Components/Register/AuthContext'
+import Login from './Components/Register/Login'
+import Register from './Components/Register/Register'
+import VerifyEmail from './Components/Register/VerifyEmail'
+import ForgotPassword from './Components/Register/ForgotPassword'
+import ResetPassword from './Components/Register/ResetPassword'
 
 const App = () => {
   // src/index.js or App.js
@@ -53,6 +58,7 @@ function Success() {
     <>
       <div className="app">
         <BrowserRouter>
+        <AuthProvider>
           <Header/>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -74,7 +80,8 @@ function Success() {
             <Route path="/drognflyhotel" element={<DragonflyHotel />} />
             <Route path="/RomanticStays" element={<RomanticSatyHome />} />
             <Route path="/gallery" element={<PhotoGallery />} />
-            <Route path="/login" element={<AuthPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/package-inner/:id" element={<PackageInner />} /> 
             <Route path="/package-inner/:id" element={<PackageInner />} /> 
@@ -87,9 +94,13 @@ function Success() {
             <Route path="/about-us" element={<AboutUs />} />
             <Route path="/faqs" element={<FAQ />} />
             <Route path="/Contact-us" element={<ContactForm />} />
+            <Route path="/verify-email" element={<VerifyEmail/>} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
           </Routes>
           <Footer />
           <HoverButtons/>
+          </AuthProvider>
         </BrowserRouter>
       </div>
     </>

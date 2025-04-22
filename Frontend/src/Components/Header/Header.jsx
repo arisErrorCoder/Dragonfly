@@ -9,8 +9,8 @@ import { FaUser, FaSearch } from 'react-icons/fa';
 import { FaCartShopping } from "react-icons/fa6";
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
-import { fireDB } from '../Login/firebase'; // Import fireDB from firebase.js
-import { ref, get } from 'firebase/database'; // Import required functions
+import { fireDB } from '../Login/firebase'; // This is your Firestore instance
+import { collection, getDocs, query, where } from 'firebase/firestore';
 
 const Header = () => {
     const location = useLocation();
@@ -19,6 +19,8 @@ const Header = () => {
     const [user, setUser] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
+    const [isSearching, setIsSearching] = useState(false);
 
     // Listen for authentication state changes
     useEffect(() => {
@@ -37,46 +39,58 @@ const Header = () => {
         }
 
         const fetchSearchResults = async () => {
-            console.log('Fetching data from the database...');
-
+            if (searchQuery.trim() === '') {
+                setSearchResults([]);
+                setIsSearching(false);
+                return;
+            }
+    
+            setIsSearching(true);
+            setSearchResults([]); // Clear previous results immediately
+    
             try {
-                const dbRef = ref(fireDB, 'Diningpackages'); // Reference to 'Diningpackages'
-                const snapshot = await get(dbRef); // Fetch data from the database
-
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    console.log('Raw data from Firebase:', data);
-
-                    // Filter documents where "best_for" matches the search query
-                    const results = Object.keys(data)
-                        .filter((key) => {
-                            const { best_for = '' } = data[key];
-                            const isMatch = best_for.toLowerCase().includes(searchQuery.toLowerCase());
-                            console.log(`Checking "${best_for}" against query "${searchQuery}":`, isMatch);
-                            return isMatch;
+                const collections = ['Diningpackages', 'RomanticStays',];
+                let allResults = [];
+    
+                for (const collectionName of collections) {
+                    const querySnapshot = await getDocs(collection(fireDB, collectionName));
+                    
+                    const results = querySnapshot.docs
+                        .filter(doc => {
+                            const data = doc.data();
+                            const searchFields = [
+                                data.name || '',
+                                data.best_for || '',
+                                data.description || ''
+                            ].join(' ').toLowerCase();
+                            
+                            return searchFields.includes(searchQuery.toLowerCase());
                         })
-                        .map((key) => ({
-                            id: key,
-                            ...data[key],
+                        .map(doc => ({
+                            id: doc.id,
+                            collection: collectionName,
+                            ...doc.data()
                         }));
-
-                    console.log('Filtered results:', results);
-                    setSearchResults(results.length > 0 ? results : []);
-                } else {
-                    console.log('No data found in Firebase.');
-                    setSearchResults([]);
+    
+                    allResults = [...allResults, ...results];
                 }
+    
+                setSearchResults(allResults);
             } catch (error) {
                 console.error('Error fetching search results:', error);
+            } finally {
+                setIsSearching(false);
             }
         };
 
-        fetchSearchResults();
+        const debounceTimer = setTimeout(fetchSearchResults, 300);
+        return () => clearTimeout(debounceTimer);
     }, [searchQuery]);
 
+    // ... rest of your component remains the same ...
     const handleNavigation = (path) => {
         navigate(path, { state: { from: location.pathname } });
-      };
+    };
 
     const toggleAccountDropdown = () => {
         setShowAccountDropdown(!showAccountDropdown);
@@ -86,7 +100,6 @@ const Header = () => {
         const auth = getAuth();
         signOut(auth)
             .then(() => {
-                console.log('Logged out successfully');
                 setUser(null);
                 navigate('/');
             })
@@ -95,10 +108,26 @@ const Header = () => {
             });
     };
 
-    const handleResultClick = (id) => {
-        navigate(`/package-inner/${id}`);
-        setSearchQuery(''); // Clear the search input
-        setSearchResults([]); // Clear the results
+    const handleResultClick = (result) => {
+        let route;
+        switch (result.collection) {
+            case 'Diningpackages':
+                route = `/package-inner/${result.id}`;
+                break;
+            case 'RomanticStays':
+                route = `/romantic-stay-inner/${result.id}`;
+                break;
+            case 'SurprisePackages':
+                route = `/surprise-package-inner/${result.id}`;
+                break;
+            default:
+                route = '/';
+        }
+        
+        navigate(route);
+        setSearchQuery('');
+        setSearchResults([]);
+        setIsSearchFocused(false);
     };
 
     return (
@@ -116,33 +145,47 @@ const Header = () => {
                             placeholder="Search packages..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
+                            onFocus={() => setIsSearchFocused(true)}
+                            onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
                         />
                         <FaSearch className="icon" />
-                        {searchQuery && (
-                            <ul className="search-results">
-                                {searchResults.length > 0 ? (
-                                    searchResults.map((result) => (
-                                        <li
-                                            key={result.id}
-                                            onClick={() => handleResultClick(result.id)}
-                                        >
-                                            {result.name || 'Unnamed Package'} (ID: {result.id})
-                                        </li>
-                                    ))
-                                ) : (
-                                    <li className="no-results">No results found</li>
-                                )}
-                            </ul>
-                        )}
+                        {isSearchFocused && searchQuery && (
+        <div className="search-results-container">
+            <ul className="search-results">
+                {isSearching ? (
+                    <li className="search-status">Searching...</li>
+                ) : searchResults.length > 0 ? (
+                    searchResults.map((result) => (
+                        <li
+                            key={`${result.collection}-${result.id}`}
+                            onClick={() => handleResultClick(result)}
+                        >
+                            <div className="search-result-item">
+                                <div className="search-result-name">
+                                    {result.name || 'Unnamed Package'}
+                                </div>
+                                <div className="search-result-category">
+                                    {result.collection.replace(/([A-Z])/g, ' $1').trim()}
+                                </div>
+                            </div>
+                        </li>
+                    ))
+                ) : (
+                    <li className="no-results">No results found</li>
+                )}
+            </ul>
+        </div>
+    )}
                     </div>
                     <div className="header-icons">
                         <FaUser className="icon" onClick={toggleAccountDropdown} />
-                        <Link to="/cart"><div className="cart-container">
-      <FaCartShopping className="icon" />
-      <span className="badge">.</span>
-    </div></Link>                      
-    
-    </div>
+                        <Link to="/cart">
+                            <div className="cart-container">
+                                <FaCartShopping className="icon" />
+                                <span className="badge">.</span>
+                            </div>
+                        </Link>                      
+                    </div>
                     {showAccountDropdown && (
                         <div className="account-dropdown">
                             <div className="arrow-up"></div>

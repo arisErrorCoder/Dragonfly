@@ -69,8 +69,12 @@ const DinningInnerPage = () => {
       content: <ul>{pkg.exclusions.map((item, index) => <li  className='cardss-li' key={index}>{item}</li>)}</ul>,
     },
     {
+      title: "Good To Know",
+      content: <ul>{pkg.good_to_know.map((item, index) => <li  className='cardss-li' key={index}>{item}</li>)}</ul>,
+    },
+    {
       title: "Cancellation and Refund Policy",
-      content: "Details about cancellation and refund policy...",
+      content: <ul>{pkg.Cancellation_and_Refund_Policy.map((item, index) => <li  className='cardss-li' key={index}>{item}</li>)}</ul>,
     },
     {
       title: "Other Useful Info",
@@ -181,16 +185,21 @@ const handleFormSubmit = async (e) => {
     const bookingData = {
       packageName: pkg.name,
       image: mainImage,
+      packageType: pkg.packageType,  // ✅ corrected key name here
       desc: pkg.description,
       price: packagePrice,
       rating: pkg.ratings,
-      addons: selectedAddons, 
+      addons: selectedAddons,
       venue: pkg.venue,
     };
-        UpdateCart(bookingData);
-
+    
+    console.log("Booking Data:", bookingData); // 🔍 Console the data here
+    
+    UpdateCart(bookingData);
+    
     // Navigate to booking page and pass data
     navigate('/booking', { state: { bookingData } });
+    
   };
 
 
@@ -320,7 +329,14 @@ const handleFormSubmit = async (e) => {
           </p>
         </div>
       </div>
-
+      <div className="br-scroll-note">
+  <p className="br-scroll-text">Scroll down to choose preferred addons and start Booking</p>
+  <div className="br-scroll-arrow">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M7 10L12 15L17 10" stroke="#4a5568" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  </div>
+</div>
       {/* Additional Information Cards */}
       <div className="Additional-Information-card-container">
         {cards.map((card, index) => (

@@ -1,0 +1,139 @@
+/* AdminTimeSlotsEditor.css */
+.time-slots-admin {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .loading {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+  }
+  
+  .package-type-selector {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .type-btn {
+    flex: 1;
+    padding: 0.75rem;
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+  
+  .type-btn.active {
+    background-color: #3498db;
+    color: white;
+  }
+  
+  .venue-selection {
+    margin-bottom: 2rem;
+  }
+  
+  .venue-selection label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  
+  .venue-selection select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+  }
+  
+  .time-slots-editor {
+    margin-top: 2rem;
+  }
+  
+  .slots-list {
+    margin-bottom: 1.5rem;
+  }
+  
+  .slot-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+  }
+  
+  .remove-btn {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0 0.5rem;
+  }
+  
+  .no-slots {
+    padding: 1rem;
+    text-align: center;
+    color: #666;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+  }
+  
+  .add-slot {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .add-slot input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+  }
+  
+  .add-btn {
+    padding: 0 1.5rem;
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  
+  .add-btn:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+  }
+  
+  .save-btn {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .save-btn:hover {
+    background-color: #2980b9;
+  }
+  
+  .save-btn:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+  }

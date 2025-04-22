@@ -1,50 +1,674 @@
-
-/* Table styling */
-.packages-table {
-  margin-top: 40px;
+/* Base Styles */
+.dp-admin-container {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  color: #333;
+  background-color: #f8f9fa;
 }
 
-.packages-table table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
+.dp-admin-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e1e1e1;
 }
 
-.packages-table th, .packages-table td {
-  padding: 10px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
+.dp-admin-header h1 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+  font-size: 2rem;
 }
 
-.packages-table th {
-  background-color: #f2f2f2;
-  font-weight: bold;
+.dp-admin-tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  gap: 10px;
 }
 
-.packages-table td {
-  background-color: #fafafa;
-}
-
-.packages-table button {
-  padding: 5px 10px;
-  font-size: 14px;
-  color: #fff;
-  background-color: #007bff;
+.dp-tab-btn {
+  padding: 12px 25px;
   border: none;
-  border-radius: 5px;
+  background-color: #f5f5f5;
+  color: #555;
+  font-weight: 600;
+  border-radius: 30px;
   cursor: pointer;
-  margin-right: 5px;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.packages-table button:hover {
-  background-color: #0056b3;
+.dp-tab-btn.active {
+  background-color: #e63946;
+  color: white;
 }
 
-.packages-table button.delete-button {
-  background-color: #dc3545;
+.dp-tab-btn:hover:not(.active) {
+  background-color: #e0e0e0;
 }
 
-.packages-table button.delete-button:hover {
-  background-color: #c82333;
+/* Form Styles */
+.dp-form-container {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  padding: 30px;
+  margin-bottom: 30px;
+}
+
+.dp-form-section {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.dp-form-section:last-child {
+  border-bottom: none;
+}
+
+.dp-form-section h2 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e63946;
+}
+
+.dp-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.dp-form-group {
+  margin-bottom: 20px;
+}
+
+.dp-form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #555;
+}
+
+.dp-form-group input,
+.dp-form-group textarea,
+.dp-form-group select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.dp-form-group input:focus,
+.dp-form-group textarea:focus,
+.dp-form-group select:focus {
+  border-color: #e63946;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
+}
+
+.dp-form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Image Upload Styles */
+.dp-image-uploader {
+  margin-top: 15px;
+}
+
+.dp-upload-btn {
+  display: inline-block;
+  padding: 12px 20px;
+  background-color: #e63946;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-bottom: 15px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.dp-upload-btn:hover {
+  background-color: #c1121f;
+}
+
+.dp-upload-btn input[type="file"] {
+  display: none;
+}
+
+.dp-upload-hint {
+  font-size: 13px;
+  color: #777;
+  margin-bottom: 15px;
+  font-style: italic;
+}
+
+.dp-image-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.dp-image-preview-item {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  aspect-ratio: 4/3;
+  transition: transform 0.3s;
+}
+
+.dp-image-preview-item:hover {
+  transform: translateY(-3px);
+}
+
+.dp-image-preview-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dp-image-delete-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  background-color: #e63946;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.3s;
+  opacity: 0.9;
+}
+
+.dp-image-delete-btn:hover {
+  background-color: #c1121f;
+  opacity: 1;
+}
+
+/* Feature Management Styles */
+.dp-feature-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.dp-feature-selector {
+  flex: 1;
+  min-width: 250px;
+}
+
+.dp-feature-input {
+  flex: 2;
+  min-width: 300px;
+  display: flex;
+  gap: 10px;
+}
+
+.dp-feature-input input {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.dp-add-feature-btn {
+  padding: 0 20px;
+  background-color: #2a9d8f;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.dp-add-feature-btn:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
+
+.dp-add-feature-btn:hover:not(:disabled) {
+  background-color: #21867a;
+}
+
+.dp-feature-lists {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.dp-feature-list {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.dp-feature-list h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 16px;
+  color: #2c3e50;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.dp-feature-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dp-feature-list li {
+  padding: 10px 0;
+  border-bottom: 1px dashed #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dp-feature-list li:last-child {
+  border-bottom: none;
+}
+
+.dp-delete-feature-btn {
+  background: none;
+  border: none;
+  color: #e63946;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0 8px;
+  transition: all 0.2s;
+}
+
+.dp-delete-feature-btn:hover {
+  transform: scale(1.2);
+}
+
+/* Form Actions */
+.dp-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.dp-submit-btn {
+  padding: 14px 30px;
+  background-color: #2a9d8f;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  min-width: 180px;
+  text-align: center;
+}
+
+.dp-submit-btn.dp-edit-mode {
+  background-color: #e63946;
+}
+
+.dp-submit-btn:hover {
+  background-color: #21867a;
+}
+
+.dp-submit-btn.dp-edit-mode:hover {
+  background-color: #c1121f;
+}
+
+.dp-submit-btn:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
+
+.dp-cancel-btn {
+  padding: 14px 30px;
+  background-color: #f5f5f5;
+  color: #555;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.dp-cancel-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.dp-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Package List Styles */
+.dp-list-container {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  padding: 30px;
+}
+
+.dp-list-controls {
+  margin-bottom: 25px;
+}
+
+.dp-search-box {
+  position: relative;
+  max-width: 400px;
+}
+
+.dp-search-box input {
+  width: 100%;
+  padding: 12px 15px 12px 40px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.dp-search-box input:focus {
+  border-color: #e63946;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
+}
+
+.dp-search-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #777;
+}
+
+.dp-package-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 25px;
+}
+
+.dp-package-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  transition: all 0.3s;
+  border-left: 4px solid #2a9d8f;
+  position: relative;
+  overflow: hidden;
+}
+
+.dp-package-card.inactive {
+  opacity: 0.85;
+  border-left-color: #95a5a6;
+}
+
+.dp-package-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.dp-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.dp-card-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.2rem;
+  flex: 1;
+}
+
+.dp-status-badge {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+  margin-left: 10px;
+}
+
+.dp-status-badge.active {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.dp-status-badge.inactive {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.dp-card-body {
+  margin-bottom: 20px;
+}
+
+.dp-card-venue {
+  color: #7f8c8d;
+  font-size: 14px;
+  margin: 5px 0;
+  font-weight: 500;
+}
+
+.dp-card-price {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 12px 0;
+}
+
+.dp-discount {
+  font-size: 14px;
+  color: #e63946;
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+.dp-card-duration {
+  color: #2a9d8f;
+  font-size: 14px;
+  margin: 8px 0;
+  font-weight: 500;
+}
+
+.dp-card-thumbnail {
+  margin-top: 15px;
+  border-radius: 6px;
+  overflow: hidden;
+  height: 120px;
+}
+
+.dp-card-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dp-card-footer {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.dp-card-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+}
+
+.dp-card-btn.edit {
+  background-color: #e63946;
+  color: white;
+}
+
+.dp-card-btn.edit:hover {
+  background-color: #c1121f;
+}
+
+.dp-card-btn.activate {
+  background-color: #2a9d8f;
+  color: white;
+}
+
+.dp-card-btn.activate:hover {
+  background-color: #21867a;
+}
+
+.dp-card-btn.deactivate {
+  background-color: #f4a261;
+  color: white;
+}
+
+.dp-card-btn.deactivate:hover {
+  background-color: #e76f51;
+}
+
+.dp-card-btn.delete {
+  background-color: #e63946;
+  color: white;
+}
+
+.dp-card-btn.delete:hover {
+  background-color: #c1121f;
+}
+
+.dp-card-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dp-no-results {
+  text-align: center;
+  padding: 40px;
+  color: #7f8c8d;
+  font-size: 16px;
+  grid-column: 1 / -1;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+/* Scroll to Top Button */
+.dp-scroll-top {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #e63946;
+  color: white;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.dp-scroll-top:hover {
+  background-color: #c1121f;
+  transform: translateY(-3px) scale(1.05);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .dp-form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .dp-feature-controls {
+    flex-direction: column;
+  }
+  
+  .dp-feature-selector,
+  .dp-feature-input {
+    min-width: 100%;
+  }
+  
+  .dp-form-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .dp-submit-btn,
+  .dp-cancel-btn {
+    width: 100%;
+  }
+  
+  .dp-package-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .dp-card-footer {
+    flex-wrap: wrap;
+  }
+  
+  .dp-card-btn {
+    min-width: calc(50% - 5px);
+  }
+}
+
+@media (max-width: 480px) {
+  .dp-admin-tabs {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .dp-tab-btn {
+    width: 100%;
+    margin: 5px 0;
+  }
+  
+  .dp-card-btn {
+    min-width: 100%;
+    margin-bottom: 8px;
+  }
+  
+  .dp-card-btn:last-child {
+    margin-bottom: 0;
+  }
+  
+  .dp-admin-header h1 {
+    font-size: 1.6rem;
+  }
 }

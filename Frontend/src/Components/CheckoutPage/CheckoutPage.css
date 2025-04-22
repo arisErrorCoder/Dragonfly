@@ -1,146 +1,332 @@
-/* CheckoutPage.css */
-
-.checkout-page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 2rem;
-  min-height: 100vh;
-  background-color: #f7f8fa;
-}
-
-.order-details {
-  width: 100%;
-  max-width: 600px;
-  background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
-  box-sizing: border-box;
-}
-
-.order-details__header {
-  font-size: 1.5rem;
-  font-weight: bold;
+/* Base Styles */
+.df-checkout-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #333;
-  margin-bottom: 1.5rem;
-  text-align: center;
 }
 
-.section {
-  margin-bottom: 1.5rem;
+/* Card Layout */
+.df-checkout-card {
+  /* background: white; */
+  border-radius: 12px;
+  /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); */
+  padding: 24px;
+  margin-bottom: 40px;
 }
 
-.section__header {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #555;
-  margin-bottom: 0.5rem;
-}
-
-.section__content,
-.guest-item p {
-  font-size: 1rem;
-  color: #666;
-  margin: 0.3rem 0;
-}
-
-.guest-list,
-.addons-list {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-}
-
-.guest-item,
-.addon-item {
-  padding: 0.8rem;
-  background-color: #f1f1f5;
-  border-radius: 6px;
-  margin-bottom: 0.5rem;
+/* Header Section */
+.df-checkout-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #eee;
 }
 
-.payment-button {
-  display: flex;
-  justify-content: center;
-  margin-top: 1.5rem;
-}
-
-.payment-button__btn {
-  padding: 0.8rem 2rem;
-  font-size: 1rem;
+.df-checkout-title {
+  font-size: 24px;
   font-weight: 600;
-  color: #fff;
-  background-color: #1a73e8;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+  color: #2c3e50;
+  margin: 0;
 }
 
-.payment-button__btn:hover {
-  background-color: #155ab6;
+.df-checkout-timer {
+  display: flex;
+  align-items: center;
+  background: #fff8e6;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 500;
+  color: #e67e22;
 }
 
-.payment-button__btn:active {
-  background-color: #1348a1;
+.df-timer-icon {
+  margin-right: 6px;
 }
 
-.error-message,
-.success-message {
-  font-size: 1rem;
-  color: #ff4c4c;
-  background-color: #ffeded;
-  padding: 0.8rem;
-  border-radius: 6px;
-  margin-top: 1rem;
+/* Section Styles */
+.df-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 24px 0 16px;
+  display: flex;
+  align-items: center;
+}
+
+.df-section-icon {
+  margin-right: 8px;
+  color: #3498db;
+}
+
+/* Summary Grid */
+.df-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.df-summary-item {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.df-summary-label {
+  display: block;
+  font-size: 14px;
+  color: #7f8c8d;
+  margin-bottom: 4px;
+}
+
+.df-summary-value {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+/* Guest Section */
+.df-guest-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.df-guest-card {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 8px;
   text-align: center;
 }
 
-/* Loading Spinner Styles */
-.loading-container {
+.df-guest-name {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.df-guest-age {
+  font-size: 14px;
+  color: #7f8c8d;
+}
+
+.df-no-guests {
+  color: #95a5a6;
+  font-style: italic;
+  text-align: center;
+  padding: 16px;
+}
+
+/* Addons Section */
+.df-addons-list {
+  margin-top: 12px;
+}
+
+.df-addon-item {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
 }
 
-.spinner {
+.df-addon-name {
+  font-weight: 500;
+}
+
+.df-addon-price {
+  color: #e74c3c;
+  font-weight: 600;
+}
+
+/* Payment Section */
+.df-payment-details {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 12px;
+}
+
+.df-payment-row {
   display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.df-payment-total {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #ddd;
+  font-weight: 600;
+}
+
+.df-total-amount {
+  color: #27ae60;
+  font-size: 18px;
+}
+
+/* Payment Button */
+.df-payment-actions {
+  margin-top: 32px;
+  text-align: center;
+}
+
+.df-pay-button {
+  background: #27ae60;
+  color: white;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
   align-items: center;
+  transition: all 0.3s ease;
+  width: 100%;
   justify-content: center;
-  animation: spin 1.5s linear infinite;
 }
 
-.spinner-image {
-  width: 60px;
-  height: 60px;
+.df-pay-button:hover {
+  background: #219653;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.df-pay-button-disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
-/* Responsive Design */
+.df-pay-icon {
+  margin-right: 8px;
+}
+
+.df-spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: df-spin 1s ease-in-out infinite;
+  margin-right: 8px;
+}
+
+@keyframes df-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Messages */
+.df-message {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.df-error-message {
+  background: #fdecea;
+  color: #e74c3c;
+  border: 1px solid #f5c6cb;
+}
+
+.df-success-message {
+  background: #e8f5e9;
+  color: #27ae60;
+  border: 1px solid #c3e6cb;
+}
+
+.df-retry-button {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  margin-top: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.df-retry-button:hover {
+  background: #c0392b;
+}
+
+/* Empty State */
+.df-empty-state {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.df-empty-image {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 20px;
+  opacity: 0.7;
+}
+
+.df-empty-title {
+  font-size: 20px;
+  color: #2c3e50;
+  margin-bottom: 8px;
+}
+
+.df-empty-text {
+  color: #7f8c8d;
+  margin-bottom: 24px;
+}
+
+.df-empty-button {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.df-empty-button:hover {
+  background: #2980b9;
+}
+
+/* Responsive Adjustments */
 @media (max-width: 768px) {
-  .order-details {
-    padding: 1.5rem;
+  .df-checkout-container {
+    padding: 15px;
   }
-
-  .order-details__header {
-    font-size: 1.3rem;
+  
+  .df-checkout-header {
+    flex-direction: column;
+    align-items: flex-start;
   }
-
-  .section__header {
-    font-size: 1.1rem;
+  
+  .df-checkout-timer {
+    margin-top: 12px;
   }
+  
+  .df-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
-  .payment-button__btn {
-    width: 100%;
-    padding: 0.8rem;
+@media (max-width: 480px) {
+  .df-checkout-card {
+    padding: 16px;
+  }
+  
+  .df-section-title {
+    font-size: 16px;
+  }
+  
+  .df-pay-button {
+    padding: 12px;
+    font-size: 15px;
   }
 }

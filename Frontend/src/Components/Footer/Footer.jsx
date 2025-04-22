@@ -18,13 +18,32 @@ const Footer = () => {
     setOpen(!isOpen);
   };
 
-  const handleSubscribe = () => {
-    if (email) {
-      console.log(`Subscribed with email: ${email}`);
-      setEmail(''); // Clear the input
-      alert('Thank you for subscribing!');
-    } else {
-      alert('Please enter a valid email.');
+  const handleSubscribe = async () => {
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+  
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/subscribe`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        setEmail(''); // Clear the input
+        alert('Thank you for subscribing! You will receive a confirmation email shortly.');
+      } else {
+        alert(data.error || 'Subscription failed. Please try again later.');
+      }
+    } catch (error) {
+      console.error('Subscription error:', error);
+      alert('An error occurred. Please try again later.');
     }
   };
 

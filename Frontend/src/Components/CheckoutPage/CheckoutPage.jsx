@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './CheckoutPage.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, doc, updateDoc, increment } from 'firebase/firestore';
+import { FiClock, FiUser, FiPhone, FiCalendar, FiPackage, FiDollarSign, FiCheckCircle } from 'react-icons/fi';
 import logooImage from '../../assets/Header/logo.png';
+import './CheckoutPage.css';
 
 const CheckoutPage = ({ isGuest, setIsGuest }) => {
   const [orderDetails, setOrderDetails] = useState(null);
@@ -16,7 +18,8 @@ const CheckoutPage = ({ isGuest, setIsGuest }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [userId, setUserId] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // New state to track authentication
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [paymentInitiated, setPaymentInitiated] = useState(false);
 
   const clearCart = () => {
     localStorage.removeItem('bookingOrderDetails');
@@ -26,32 +29,28 @@ const CheckoutPage = ({ isGuest, setIsGuest }) => {
   };
 
   useEffect(() => {
-    // Scroll to top when this page is rendered
     window.scrollTo(0, 0);
 
     const auth = getAuth();
+    const db = getFirestore();
 
-    // Check login or guest checkout status
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUserId(user.uid);
         setEmail(user.email);
         setIsAuthenticated(true);
       } else if (!isGuest) {
-        // If not logged in and not a guest, redirect to login
         navigate('/login', { state: { from: location.pathname } });
       } else {
-        setIsAuthenticated(true); // Allow access for guest checkout
+        setIsAuthenticated(true);
       }
     });
 
-    // Validate order details from localStorage
     const storedOrderDetails = JSON.parse(localStorage.getItem('bookingOrderDetails'));
     if (storedOrderDetails) {
       setOrderDetails(storedOrderDetails);
       setProductDetails(storedOrderDetails);
 
-      // Start countdown timer
       const timer = setInterval(() => {
         setTimeLeft((prevTime) => {
           if (prevTime <= 1) {
@@ -63,9 +62,9 @@ const CheckoutPage = ({ isGuest, setIsGuest }) => {
         });
       }, 1000);
 
-      return () => clearInterval(timer); // Cleanup on unmount
+      return () => clearInterval(timer);
     } else {
-      navigate('/'); // Redirect to home if no order details found
+      navigate('/');
     }
 
     return () => {
@@ -73,19 +72,53 @@ const CheckoutPage = ({ isGuest, setIsGuest }) => {
     };
   }, [isGuest, navigate, location]);
 
+  const updateVenueAvailability = async (venueName, checkInDate, timeSlot) => {
+    const db = getFirestore();
+    const venueRef = doc(db, 'venues', venueName);
+    
+    try {
+      await updateDoc(venueRef, {
+        [`bookedRooms.${checkInDate}.${timeSlot}`]: increment(0)
+      });
+      return true;
+    } catch (error) {
+      console.error("Error updating venue availability:", error);
+      return false;
+    }
+  };
+
   const handlePayment = async () => {
-    if (!orderDetails) return;
+    if (!orderDetails || paymentInitiated) return;
 
     setLoading(true);
     setError(null);
     setSuccess(null);
+    setPaymentInitiated(true);
 
     try {
+      // First update venue availability
+      const venueUpdated = await updateVenueAvailability(
+        orderDetails.packageName,
+        orderDetails.checkInDate,
+        orderDetails.timeSlot
+      );
+
+      if (!venueUpdated) {
+        throw new Error("Failed to update venue availability");
+      }
+
+      // Then proceed with payment
       const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/create-order`, {
         name: orderDetails.billingName,
         mobileNumber: orderDetails.billingPhone,
         amount: orderDetails.totalPrice,
-        productDetails,
+        productDetails: {
+          ...orderDetails,
+          venue: orderDetails.packageName,
+          checkInDate: orderDetails.checkInDate,
+          timeSlot: orderDetails.timeSlot,
+          roomsBooked: 1 // Track how many rooms were booked
+        },
         userId,
         email,
       });
@@ -95,10 +128,16 @@ const CheckoutPage = ({ isGuest, setIsGuest }) => {
         window.location.href = response.data.url;
       }
     } catch (error) {
-      setError('Failed to initiate payment');
+      setPaymentInitiated(false);
+      setError(error.message || 'Failed to initiate payment');
       setLoading(false);
+      
+      // If payment failed but venue was updated, we need to revert
+      if (error.message.includes("venue availability")) {
+        // In a real app, you'd want to implement a transaction or revert mechanism
+        console.error("Payment failed after venue was updated - need to revert");
+      }
     }
-    
   };
 
   const formatTime = (seconds) => {
@@ -107,7 +146,6 @@ const CheckoutPage = ({ isGuest, setIsGuest }) => {
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  // If not authenticated, show loading or redirect logic
   if (!isAuthenticated) {
     return <div>Loading...</div>;
   }
@@ -123,75 +161,147 @@ const CheckoutPage = ({ isGuest, setIsGuest }) => {
   }
 
   return (
-    <div className="checkout-page">
+<div className="df-checkout-container">
       {orderDetails ? (
-        <div className="order-details">
-          <h2 className="order-details__header">Order Details</h2>
-
-          <div className="section">
-            <h3 className="section__header">Order ID: {orderDetails?.orderId}</h3>
-            <p className="section__content">Package: {productDetails?.packageName}</p>
-            <p className="section__content">Check-in Date: {productDetails?.checkInDate}</p>
-            <p className="section__content">Time Slot: {productDetails?.timeSlot}</p>
-            <p className="section__content">Rating: {productDetails?.rating} Stars</p>
+        <div className="df-checkout-card">
+          {/* Header Section */}
+          <div className="df-checkout-header">
+            <h2 className="df-checkout-title">Complete Your Booking</h2>
+            <div className="df-checkout-timer">
+              <FiClock className="df-timer-icon" />
+              <span>Time remaining: {formatTime(timeLeft)}</span>
+            </div>
           </div>
 
-          <div className="section">
-            <h3 className="section__header">Guest Details</h3>
-            {productDetails?.guestDetails?.length > 0 ? (
-              <ul className="guest-list">
-                {productDetails.guestDetails.map((guest, index) => (
-                  <li key={guest.id} className="guest-item">
-                    <p>Name: {guest.name}</p>
-                    <p>Age: {guest.age}</p>
-                  </li>
+          {/* Booking Summary */}
+          <div className="df-summary-section">
+            <h3 className="df-section-title">
+              <FiCalendar className="df-section-icon" />
+              Booking Summary
+            </h3>
+            <div className="df-summary-grid">
+              <div className="df-summary-item">
+                <span className="df-summary-label">Venue:</span>
+                <span className="df-summary-value">{orderDetails.venue}</span>
+              </div>
+              <div className="df-summary-item">
+                <span className="df-summary-label">Date:</span>
+                <span className="df-summary-value">{orderDetails.checkInDate}</span>
+              </div>
+              <div className="df-summary-item">
+                <span className="df-summary-label">Time Slot:</span>
+                <span className="df-summary-value">{orderDetails.timeSlot}</span>
+              </div>
+              <div className="df-summary-item">
+                <span className="df-summary-label">Package:</span>
+                <span className="df-summary-value">{orderDetails.packageName}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Guest Information */}
+          <div className="df-guest-section">
+            <h3 className="df-section-title">
+              <FiUser className="df-section-icon" />
+              Guest Information
+            </h3>
+            {orderDetails.guestDetails?.length > 0 ? (
+              <div className="df-guest-grid">
+                {orderDetails.guestDetails.map((guest) => (
+                  <div key={guest.id} className="df-guest-card">
+                    <div className="df-guest-name">{guest.name}</div>
+                    <div className="df-guest-age">{guest.age} years</div>
+                  </div>
                 ))}
-              </ul>
+              </div>
             ) : (
-              <p>No guest details available</p>
+              <p className="df-no-guests">No guest details available</p>
             )}
           </div>
 
-          <div className="section">
-            <h3 className="section__header">Special Request</h3>
-            <p className="section__content">{productDetails?.specialRequest}</p>
-          </div>
-
-          <div className="section">
-            <h3 className="section__header">Payment Option</h3>
-            <p className="section__content">{productDetails?.paymentOption}</p>
-          </div>
-
-          {productDetails?.addons && productDetails.addons.length > 0 && (
-            <div className="section">
-              <h3 className="section__header">Addons</h3>
-              <ul className="addons-list">
-                {productDetails.addons.map((addon, index) => (
-                  <li key={index} className="addon-item">{addon.name}</li>
+          {/* Addons Section */}
+          {orderDetails.addons?.length > 0 && (
+            <div className="df-addons-section">
+              <h3 className="df-section-title">Selected Addons</h3>
+              <div className="df-addons-list">
+                {orderDetails.addons.map((addon) => (
+                  <div key={addon.id} className="df-addon-item">
+                    <span className="df-addon-name">{addon.name}</span>
+                    <span className="df-addon-price">₹{addon.price}</span>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           )}
-          <div className="section">
-            <h3 className="section__header">Total Price: ₹{productDetails?.totalPrice}</h3>
+
+          {/* Payment Summary */}
+          <div className="df-payment-section">
+            <h3 className="df-section-title">
+              <FiDollarSign className="df-section-icon" />
+              Payment Summary
+            </h3>
+            <div className="df-payment-details">
+              <div className="df-payment-row">
+                <span>Subtotal:</span>
+                <span>₹{orderDetails.totalPrice}</span>
+              </div>
+              <div className="df-payment-row">
+                <span>Payment Option:</span>
+                <span>{orderDetails.paymentOption}</span>
+              </div>
+              <div className="df-payment-total">
+                <span>Total Amount:</span>
+                <span className="df-total-amount">₹{orderDetails.totalPrice}</span>
+              </div>
+            </div>
           </div>
 
-          <div className="timer-section">
-            <h3 className="timer-header">Time Left to Complete Payment:</h3>
-            <p className="timer-content">{formatTime(timeLeft)}</p>
-          </div>
-
-          <div className="payment-button">
-            <button className="payment-button__btn" onClick={handlePayment} disabled={loading}>
-              {loading ? 'Processing...' : 'Pay Now'}
+          {/* Payment Button */}
+          <div className="df-payment-actions">
+            <button 
+              className={`df-pay-button ${loading || paymentInitiated ? 'df-pay-button-disabled' : ''}`}
+              onClick={handlePayment}
+              disabled={loading || paymentInitiated}
+            >
+              {loading ? (
+                <span className="df-spinner"></span>
+              ) : (
+                <>
+                  <FiCheckCircle className="df-pay-icon" />
+                  {paymentInitiated ? 'Processing...' : 'Proceed to Payment'}
+                </>
+              )}
             </button>
           </div>
 
-          {error && <div className="error-message">{error}</div>}
-          {success && <div className="success-message">{success}</div>}
+          {/* Error/Success Messages */}
+          {error && (
+            <div className="df-message df-error-message">
+              {error}
+              {error.includes("venue") && (
+                <button 
+                  className="df-retry-button"
+                  onClick={() => navigate('/booking')}
+                >
+                  Try Different Dates
+                </button>
+              )}
+            </div>
+          )}
+          {success && <div className="df-message df-success-message">{success}</div>}
         </div>
       ) : (
-        <div>Loading order details...</div>
+        <div className="df-empty-state">
+          <img src={logooImage} alt="Empty Cart" className="df-empty-image" />
+          <h3 className="df-empty-title">No Booking Found</h3>
+          <p className="df-empty-text">Your booking details couldn't be loaded</p>
+          <button 
+            className="df-empty-button"
+            onClick={() => navigate('/')}
+          >
+            Return to Home
+          </button>
+        </div>
       )}
     </div>
   );

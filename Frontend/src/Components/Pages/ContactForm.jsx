@@ -34,9 +34,50 @@ const ContactForm = () => {
     });
   };
 
-  const handleSubmit = () => {
-    // Handle form submission logic
-    console.log("Form submitted:", formData);
+  const handleSubmit = async () => {
+    // Validate all required fields
+    const newFormStatus = {
+      name: formData.name.trim() ? "success" : "error",
+      email: formData.email.trim() && formData.email.includes('@') ? "success" : "error",
+      subject: "success", // Optional field
+      message: formData.message.trim() ? "success" : "error"
+    };
+  
+    setFormStatus(newFormStatus);
+  
+    // Check if all required fields are valid
+    if (newFormStatus.email === "error" || newFormStatus.message === "error") {
+      return;
+    }
+  
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        // Reset form on success
+        setFormData({
+          name: "",
+          email: "",
+          subject: "",
+          message: "",
+        });
+        alert('Thank you! Your message has been sent successfully.');
+      } else {
+        alert('Failed to send message. Please try again later.');
+        console.error(data.errors);
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('An error occurred. Please try again later.');
+    }
   };
 
   return (

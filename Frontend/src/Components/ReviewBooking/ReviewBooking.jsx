@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import "./ReviewBooking.css";
-import { getAuth, onAuthStateChanged } from 'firebase/auth'; // Firebase imports
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { db } from '../Register/firebase'; // Your Firebase initialization
 import { useLocation, useNavigate } from "react-router-dom";
-import { getFirestore, collection, addDoc, getDocs, query, where } from "firebase/firestore"; // Firestore functions
+import { getFirestore, collection, addDoc, getDoc, getDocs, query, where, doc, updateDoc } from "firebase/firestore";
+import { FaUserPlus, FaTrash, FaTimes, FaCheck, FaCalendarAlt, FaClock, FaInfoCircle } from "react-icons/fa";
+import VenueAvailability from "./VenueAvailability";
 
 const BookingReview = ({ isGuest, setIsGuest }) => {
   const location = useLocation();
@@ -12,34 +15,29 @@ const BookingReview = ({ isGuest, setIsGuest }) => {
   const [guestList, setGuestList] = useState([]);
   const [couponCode, setCouponCode] = useState("");
   const [discount, setDiscount] = useState(0);
-  const [request, setRequest] = useState(""); // Special requests
-  const [guestLimitAlert, setGuestLimitAlert] = useState(""); // Guest limit alert
-  const [paymentOption, setPaymentOption] = useState("50%"); // Payment option
-  const [finalTotal, setFinalTotal] = useState(bookingData?.price || 0); // Final total after discount
-  const [orderDetails, setOrderDetails] = useState(null); // Confirmed order details
-  const [checkInDate, setCheckInDate] = useState(""); // State for check-in date
-  const [billingName, setBillingName] = useState(""); // Billing Name
-  const [billingPhone, setBillingPhone] = useState(""); // Billing Phone Number
-  const [recommendedCoupons, setRecommendedCoupons] = useState([]); // Recommended coupons
-  const roomPrice = bookingData?.price || 0; // Get room price from bookingData
-  const addonsPrice = bookingData?.addons?.reduce((total, addon) => total + Number(addon.price), 0) || 0; // Addons price
-  const totalRoomPrice = roomPrice + addonsPrice - discount; // Total room price after discount
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [request, setRequest] = useState("");
+  const [guestLimitAlert, setGuestLimitAlert] = useState("");
+  const [paymentOption, setPaymentOption] = useState("50%");
+  const [finalTotal, setFinalTotal] = useState(bookingData?.price || 0);
+  const [orderDetails, setOrderDetails] = useState(null);
+  const [checkInDate, setCheckInDate] = useState("");
+  const [billingName, setBillingName] = useState("");
+  const [billingPhone, setBillingPhone] = useState("");
+  const [recommendedCoupons, setRecommendedCoupons] = useState([]);
   const [timeSlot, setTimeSlot] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");  // Error state
-  const [successMessage, setSuccessMessage] = useState("");  // Success state
-  const [loading, setLoading] = useState(false);  // Loader state
-  const [paymentStatus, setPaymentStatus] = useState(); // Payment status
-  const [bookingDetails, setBookingDetails] = useState({
-    checkInDate: "",
-    timeSlot: "",
-    guestDetails: "",
-  });
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [email, setEmail] = useState('');
-  const toggleDropdown = () => {
-    setIsDropdownOpen((prevState) => !prevState); // Toggle the dropdown state
-  };
+  const [showCouponTooltip, setShowCouponTooltip] = useState(false);
+  const [roomsAvailable, setRoomsAvailable] = useState(null);
+  const [timeSlots, setTimeSlots] = useState([]);
+
+  const roomPrice = bookingData?.price || 0;
+  const addonsPrice = bookingData?.addons?.reduce((total, addon) => total + Number(addon.price), 0) || 0;
+  const totalRoomPrice = roomPrice + addonsPrice - discount;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -50,33 +48,107 @@ const BookingReview = ({ isGuest, setIsGuest }) => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
         setIsAuthenticated(true);
-        setEmail(user.email); // Set user email
+        setEmail(user.email);
       } else {
         setIsAuthenticated(false);
       }
     });
 
-   // Cleanup the subscription when the component unmounts
     return () => unsubscribeAuth();
   }, []);
 
-  const timeSlots = [
-    "12:00 AM - 4:00 AM",
-    "4:00 AM - 8:00 AM",
-    "8:00 AM - 12:00 PM",
-    "12:00 PM - 4:00 PM",
-    "4:00 PM - 8:00 PM",
-    "8:00 PM - 12:00 AM",
-  ];
+  const formatVenueText = (venue) => {
+    if (!venue) return '';
+    return venue.toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
 
-  // Add guest logic with limit check
+
+  useEffect(() => {
+    const fetchTimeSlots = async () => {
+      try {
+        console.log('Starting to fetch time slots...');
+        console.log('Full bookingData:', bookingData); // Log entire bookingData
+        
+        const venueName = formatVenueText(bookingData?.packageName);
+        console.log('Formatted venue name:', venueName);
+        
+        if (!venueName) {
+          console.log('No venue name found, setting empty slots');
+          setTimeSlots([]);
+          return;
+        }
+  
+        // Determine which collection to query based on package type
+        const packageType = bookingData.packageType;
+        console.log('Determined package type:', packageType);
+        const collectionName = 
+        packageType === 'stayVenues' ? 'stayVenues' : 
+        packageType === 'diningVenues' ? 'diningVenues' : null;
+              console.log('Using collection:', collectionName);
+        const configRef = doc(db, 'timeSlotsConfig', collectionName);
+        console.log('Firestore reference:', configRef.path);
+        
+        const docSnap = await getDoc(configRef);
+        console.log('Document snapshot exists:', docSnap.exists());
+        
+        if (docSnap.exists()) {
+          const venueData = docSnap.data();
+          console.log('Full document data:', venueData);
+          
+          // Check for both formatted and original venue name
+          const slots = venueData[venueName] || 
+                       venueData[bookingData?.packageName] ||
+                       [];
+          
+          console.log('Found time slots:', slots);
+          
+          if (Array.isArray(slots)) {
+            setTimeSlots(slots);
+          } else {
+            // Handle case where slots might be an object with day/night properties
+            const packageTime = bookingData?.packageName?.toLowerCase();
+            let finalSlots = [];
+            
+            if (typeof slots === 'object') {
+              if (packageTime?.includes('day') && slots.day) {
+                finalSlots = Array.isArray(slots.day) ? slots.day : [slots.day];
+              } else if (packageTime?.includes('night') && slots.night) {
+                finalSlots = Array.isArray(slots.night) ? slots.night : [slots.night];
+              } else if (slots.default) {
+                finalSlots = Array.isArray(slots.default) ? slots.default : [slots.default];
+              }
+            }
+            
+            console.log('Processed time slots:', finalSlots);
+            setTimeSlots(finalSlots);
+          }
+        } else {
+          console.log('Document does not exist in Firestore');
+          setTimeSlots([]);
+        }
+      } catch (error) {
+        console.error("Error fetching time slots:", error);
+        setTimeSlots([]);
+      }
+    };
+  
+    if (bookingData?.packageName) {
+      fetchTimeSlots();
+    } else {
+      setTimeSlots([]);
+    }
+  }, [bookingData?.packageName, bookingData?.packageType]);
+
   const addGuest = () => {
     if (totalGuests >= 2) {
       setGuestLimitAlert("You can only add up to 2 guests (Additional Guest Charge Rs:1000 contact: +91 9930216903)");
     } else {
       setTotalGuests(totalGuests + 1);
       setGuestList([...guestList, { name: "", age: "", id: totalGuests + 1 }]);
-      setGuestLimitAlert(""); // Clear alert on successful guest addition
+      setGuestLimitAlert("");
     }
   };
 
@@ -107,7 +179,15 @@ const BookingReview = ({ isGuest, setIsGuest }) => {
       alert("Please enter the billing phone number.");
       return false;
     }
-    return true; // All validations passed
+    if (roomsAvailable === null) {
+      alert("Please check availability for your selected time slot.");
+      return false;
+    }
+    if (roomsAvailable <= 0) {
+      alert("No rooms available for selected time slot. Please choose another.");
+      return false;
+    }
+    return true;
   };
 
   useEffect(() => {
@@ -139,104 +219,128 @@ const BookingReview = ({ isGuest, setIsGuest }) => {
   };
 
   const checkSlotAvailability = async () => {
-    setLoading(true); // Start the loader
-    setErrorMessage(""); // Clear previous error message
-    setSuccessMessage(""); // Clear previous success message
-
-    const db = getFirestore();
-    const bookingRef = collection(db, "orders");
+    const venue = formatVenueText(bookingData?.packageName);
+    
+    if (!checkInDate) {
+      setErrorMessage("Please select a date");
+      return;
+    }
+    
+    if (!timeSlot) {
+      setErrorMessage("Please select a time slot");
+      return;
+    }
+  
+    if (!venue) {
+      setErrorMessage("Venue information is missing");
+      setLoading(false);
+      return;
+    }
+    
+    setLoading(true);
+    setErrorMessage("");
+    setSuccessMessage("");
     
     try {
-      // Example query for checking availability
-      const q = query(
-        bookingRef,
-        where("productDetails.checkInDate", "==", "2024-11-21"),
-        where("productDetails.timeSlot", "==", timeSlot)
-      );
-
-      const querySnapshot = await getDocs(q);
-
-      // Check if the slot is available or already booked
-      if (!querySnapshot.empty) {
-        setErrorMessage("This time slot is already booked. Please choose another.");
+      // First check if we already have availability data
+      if (roomsAvailable !== null) {
+        if (roomsAvailable <= 0) {
+          setErrorMessage("No rooms available for this time slot. Please choose another.");
+        } else {
+          setSuccessMessage("Time slot available!");
+        }
+        return;
+      }
+  
+      // If we don't have availability data yet, fetch it
+      const availabilityRef = doc(db, 'venueAvailability', venue);
+      const docSnap = await getDoc(availabilityRef);
+      
+      if (docSnap.exists()) {
+        const availabilityData = docSnap.data();
+        const dateKey = checkInDate; // or format the date if needed
+        
+        if (availabilityData[dateKey] && availabilityData[dateKey][timeSlot]) {
+          const availableRooms = availabilityData[dateKey][timeSlot].available;
+          setRoomsAvailable(availableRooms);
+          
+          if (availableRooms <= 0) {
+            setErrorMessage("No rooms available for this time slot. Please choose another.");
+          } else {
+            setSuccessMessage("Time slot available!");
+          }
+        } else {
+          setErrorMessage("Availability data not found for selected date/time");
+        }
       } else {
-        setSuccessMessage("This time slot is available!");
+        setErrorMessage("Venue availability data not found");
       }
     } catch (error) {
       console.error("Error checking availability:", error);
       setErrorMessage("An error occurred while checking availability.");
     } finally {
-      setLoading(false); // Stop the loader
+      setLoading(false);
     }
-  };
-  
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    const updatedDetails = { ...bookingDetails, [name]: value };
-    setBookingDetails(updatedDetails);
-    localStorage.setItem("bookingDetails", JSON.stringify(updatedDetails));
   };
 
   const handleProceedToCheckout = async () => {
-    // Run the validation checks first
     if (!validateFields()) {
-      return; // Stop if validation fails
+      return;
     }
-  
-    // Check if the time slot is available
-    if (errorMessage === "This time slot is already booked. Please choose another.") {
-      alert("This time slot is already booked. Please select a different time slot.");
-      return; // Stop if slot is unavailable
+
+    if (roomsAvailable !== null && roomsAvailable <= 0) {
+      alert("No rooms available for selected time slot.");
+      return;
     }
-  
+
     const orderDetailsToSubmit = {
       ...bookingData,
       guestDetails: guestList,
-      checkInDate, // Include check-in date
+      checkInDate,
       paymentOption,
       totalPrice: finalTotal,
       specialRequest: request,
-      billingName, // Include billing name
-      billingPhone, // Include billing phone
-      addons: bookingData?.addons || [], // Include addons details
-      timeSlot // Include selected time slot
+      billingName,
+      billingPhone,
+      addons: bookingData?.addons || [],
+      timeSlot,
+      roomsAvailable
     };
-  
-    // Save order details and navigate to checkout if available
-    localStorage.setItem("bookingOrderDetails", JSON.stringify(orderDetailsToSubmit));
-    setOrderDetails(orderDetailsToSubmit); // Store order details for display
-  
-    navigate("/checkout", {
-      state: {
-        bookingData,
-        guestList,
-        paymentOption,
-        finalTotal,
-        request,
-        checkInDate,
-        billingName,
-        billingPhone,
-        timeSlot,
-        orderDetails: orderDetailsToSubmit,
-      }
-    });
-  };
-  
-  useEffect(() => {
-    const savedData = localStorage.getItem("bookingDetails");
-    if (savedData) {
-      setBookingDetails(JSON.parse(savedData));
-    }
-  }, []);
 
-  // Remove guest logic
+    localStorage.setItem("bookingOrderDetails", JSON.stringify(orderDetailsToSubmit));
+    setOrderDetails(orderDetailsToSubmit);
+
+    if (!isAuthenticated) {
+      navigate("/login", {
+        state: { 
+          from: "/checkout",
+          bookingData: orderDetailsToSubmit 
+        }
+      });
+    } else {
+      navigate("/checkout", {
+        state: {
+          bookingData: orderDetailsToSubmit,
+          guestList,
+          paymentOption,
+          finalTotal,
+          request,
+          checkInDate,
+          billingName,
+          billingPhone,
+          timeSlot,
+          orderDetails: orderDetailsToSubmit,
+        }
+      });
+    }
+  };
+
   const removeGuest = (id) => {
     setGuestList(guestList.filter((guest) => guest.id !== id));
     setTotalGuests(totalGuests - 1);
-    setGuestLimitAlert(""); // Clear alert when guest is removed
+    setGuestLimitAlert("");
   };
 
-  // Handle guest info change
   const handleGuestChange = (id, field, value) => {
     setGuestList(
       guestList.map((guest) =>
@@ -259,7 +363,7 @@ const BookingReview = ({ isGuest, setIsGuest }) => {
             const discountValue = parseInt(couponData.discount, 10);
             setDiscount(discountValue);
             setFinalTotal(totalRoomPrice - discountValue);
-            alert(`Coupon applied!`);
+            alert(`Coupon applied! Discount: ₹${discountValue}`);
           }
         });
       } else {
@@ -271,274 +375,381 @@ const BookingReview = ({ isGuest, setIsGuest }) => {
       alert("An error occurred while applying the coupon.");
     }
   };
+
   const getFinalAmount = (paymentOption) => {
     return paymentOption === "50%" ? totalRoomPrice / 2 : totalRoomPrice;
   };
   
   const handleGuestLoginChange = (e) => {
-    setIsGuest(e.target.checked); // Update guest login state when checkbox is toggled
+    setIsGuest(e.target.checked);
+  };
+
+  const handleAvailabilityChange = (newAvailability) => {
+    setRoomsAvailable(newAvailability);
   };
 
   return (
-    <div className="booking-container">
-<header>
-        <h1>Review Your Booking</h1>
-</header>
+    <div className="br-container">
+      <div className="br-header">
+        <h1 className="br-title">Review Your Booking</h1>
+        <p className="br-subtitle">Please review your details before proceeding to payment</p>
+      </div>
 
-<div className="booking-content">
-<div className="left-section">
-        <div className="booking-input"> 
-          <label htmlFor="checkInDate">Check-in Date</label>             
-          <input type="date" id="checkInDate" name="checkInDate"  value={checkInDate} onChange={(e) => setCheckInDate(e.target.value)} required /> 
-          </div> 
-          <div className="form-containerr">
-      <label className="time-slot-label">Time Slot:
-        <select className="time-slot-dropdown" value={timeSlot} onChange={(e) => setTimeSlot(e.target.value)}>
-          <option value="">Select a time slot</option>
-          {timeSlots.map((slot) => (
-            <option key={slot} value={slot}>{slot}</option>
-          ))}
-        </select>
-      </label>
-      <button className="check-availability-button" onClick={checkSlotAvailability} disabled={loading}>
-        {loading ? <div className="timeslot-loader"></div> : "Check Availability"}
-      </button>
-      
-      {/* Display messages */}
-    </div>
-      {errorMessage && <p className="error-message">{errorMessage}</p>}
-      {successMessage && <p className="success-message">{successMessage}</p>}
-
-          <div className="guest-details">
-            <h3>Guest Details</h3>
-            <div id="guestList">
-              {guestList.map((guest) => (
-                <div key={guest.id} className="guest-entry">
-                  <label htmlFor={`guestName${guest.id}`}>
-                    Guest {guest.id} Name:
-                  </label>
-                  <input
-                    type="text"
-                    id={`guestName${guest.id}`}
-                    placeholder="name"
-                    value={guest.name}
-                    onChange={(e) =>
-                      handleGuestChange(guest.id, "name", e.target.value)
-                    }
-                    required
-                  />
-                  <label htmlFor={`guestAge${guest.id}`}>Age:</label>
-                  <input
-                    type="number"
-                    id={`guestAge${guest.id}`}
-                    min="1"
-                    placeholder="age"
-                    value={guest.age}
-                    onChange={(e) =>
-                      handleGuestChange(guest.id, "age", e.target.value)
-                    }
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="remove-guest-btn"
-                    onClick={() => removeGuest(guest.id)}
+      <div className="br-content">
+        <div className="br-form-section">
+          {/* Date and Time Section */}
+          <div className="br-form-card">
+            <h2 className="br-card-title">
+              <FaCalendarAlt className="br-card-icon" /> Date & Time
+            </h2>
+            <div className="br-form-row">
+              <div className="br-form-group">
+                <label className="br-label">Check-in Date</label>
+                <input 
+                  className="br-input"
+                  type="date" 
+                  value={checkInDate} 
+                  onChange={(e) => setCheckInDate(e.target.value)} 
+                  min={new Date().toISOString().split('T')[0]}
+                  required 
+                />
+              </div>
+              
+              <div className="br-form-group">
+                <label className="br-label">Time Slot</label>
+                <div className="br-time-slot-container">
+                <select 
+  className="br-select"
+  value={timeSlot} 
+  onChange={(e) => setTimeSlot(e.target.value)}
+  disabled={!bookingData?.packageName || timeSlots.length === 0}
+>
+  <option value="">Select a time slot</option>
+  {timeSlots.map((slot, index) => (
+    <option key={index} value={slot}>{slot}</option>
+  ))}
+</select>
+                  {/* <button 
+                    className="br-availability-btn"
+                    onClick={checkSlotAvailability}
+                    disabled={!checkInDate || !timeSlot}
                   >
-                    Remove
-                  </button>
+                    {loading ? (
+                      <div className="br-spinner"></div>
+                    ) : (
+                      <>
+                        <FaClock /> Check Availability
+                      </>
+                    )}
+                  </button> */}
+                </div>
+                {errorMessage && <div className="br-error-message"><FaTimes /> {errorMessage}</div>}
+                {successMessage && <div className="br-success-message"><FaCheck /> {successMessage}</div>}
+                
+                {checkInDate && timeSlot && bookingData?.packageName && (
+                  <VenueAvailability 
+                    venueName={formatVenueText(bookingData.packageName)}
+                    checkInDate={checkInDate}
+                    timeSlot={timeSlot}
+                    onAvailabilityChange={handleAvailabilityChange}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Guest Details Section */}
+          <div className="br-form-card">
+            <h2 className="br-card-title">
+              <FaUserPlus className="br-card-icon" /> Guest Details
+            </h2>
+            
+            <div className="br-guest-list">
+              {guestList.map((guest) => (
+                <div key={guest.id} className="br-guest-entry">
+                  <div className="br-guest-input-group">
+                    <input
+                      className="br-guest-input"
+                      type="text"
+                      placeholder="Guest Name"
+                      value={guest.name}
+                      onChange={(e) => handleGuestChange(guest.id, "name", e.target.value)}
+                      required
+                    />
+                    <input
+                      className="br-guest-input"
+                      type="number"
+                      placeholder="Age"
+                      min="1"
+                      value={guest.age}
+                      onChange={(e) => handleGuestChange(guest.id, "age", e.target.value)}
+                      required
+                    />
+                    <button
+                      className="br-remove-guest-btn"
+                      onClick={() => removeGuest(guest.id)}
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
 
-            {/* Guest limit alert */}
-            {guestLimitAlert && (
-              <div className="guest-limit-alert">
-                <p>{guestLimitAlert}</p>
+            {totalGuests >= 2 && (
+              <div className="br-additional-guest-info">
+                <div className="br-additional-guest-notice">
+                  <FaInfoCircle /> Maximum 2 guests included in base price.
+                </div>
+                <div className="br-additional-guest-pricing">
+                  <p>Additional guests: ₹1000 per person</p>
+                  <p>Contact after booking: +91 9930216903</p>
+                </div>
               </div>
             )}
 
-            <div className="booking-input">
-              <label htmlFor="totalGuests">Total Guests: {totalGuests}</label>
+            {guestLimitAlert && (
+              <div className="br-guest-limit-alert">
+                <FaInfoCircle /> {guestLimitAlert}
+              </div>
+            )}
+
+            <div className="br-guest-controls">
+              <button 
+                className="br-add-guest-btn"
+                onClick={addGuest}
+                disabled={totalGuests >= 2}
+              >
+                <FaUserPlus /> Add Guest ({totalGuests}/2)
+              </button>
+              
+              {guestList.length > 0 && (
+                <button
+                  className="br-clear-guests-btn"
+                  onClick={() => {
+                    setGuestList([]);
+                    setTotalGuests(0);
+                  }}
+                >
+                  Clear All
+                </button>
+              )}
             </div>
-
-            <button type="button" className="add-guest-btn" onClick={addGuest}>
-              Add Guest
-            </button>
-
-            <button
-              type="button"
-              className="clear-guest-btn"
-              onClick={() => {
-                setGuestList([]);
-                setTotalGuests(0); // Reset total guests to 0
-                setGuestLimitAlert(""); // Clear alert
-              }}
-            >
-              Clear All Guests
-            </button>
           </div>
 
-          <div className="booking-input coupon-input">
-            <label htmlFor="couponCode">Coupon Code</label>
-            <input
-              type="text"
-              id="couponCode"
-              name="couponCode"
-              placeholder="Enter coupon code"
-              value={couponCode}
-              onChange={(e) => setCouponCode(e.target.value)}
-            />
-            <button type="button" className="apply-btn" onClick={() => applyCoupon()}>
-              Apply
-            </button>
+          {/* Billing Information Section */}
+          <div className="br-form-card">
+            <h2 className="br-card-title">Billing Information</h2>
+            
+            <div className="br-form-group">
+              <label className="br-label">Billing Name</label>
+              <input
+                className="br-input"
+                type="text"
+                value={billingName}
+                onChange={(e) => setBillingName(e.target.value)}
+                required
+              />
+            </div>
+            
+            <div className="br-form-group">
+              <label className="br-label">Billing Phone Number</label>
+              <input
+                className="br-input"
+                type="tel"
+                value={billingPhone}
+                onChange={(e) => setBillingPhone(e.target.value)}
+                required
+              />
+            </div>
           </div>
-          {/* Special request input text area */}
-          <div className="request-input">
-            <label htmlFor="specialRequest">Special Request</label>
+
+          {/* Coupon Section */}
+          <div className="br-form-card">
+            <h2 className="br-card-title">Coupons & Offers</h2>
+            
+            <div className="br-coupon-input-group">
+              <input
+                className="br-coupon-input"
+                type="text"
+                placeholder="Enter coupon code"
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value)}
+              />
+              <button 
+                className="br-apply-coupon-btn"
+                onClick={() => applyCoupon()}
+              >
+                Apply
+              </button>
+            </div>
+            
+            {discount > 0 && (
+              <div className="br-coupon-applied">
+                <FaCheck /> Coupon applied! You saved ₹{discount}
+              </div>
+            )}
+          </div>
+
+          {/* Special Requests Section */}
+          <div className="br-form-card">
+            <h2 className="br-card-title">Special Requests</h2>
             <textarea
-              id="specialRequest"
-              name="specialRequest"
-              placeholder="Enter any special requests"
+              className="br-textarea"
+              placeholder="Any special requests or notes for your booking..."
               value={request}
               onChange={(e) => setRequest(e.target.value)}
               rows="4"
             />
           </div>
 
-          <div className="payment-options">
-            <h3>Payment Options</h3>
-            <label>
-              <input
-                type="radio"
-                name="paymentOption"
-                value="50%"
-                checked={paymentOption === "50%"}
-                onChange={() => setPaymentOption("50%")}
-              />
-              Pay 50%
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="paymentOption"
-                value="100%"
-                checked={paymentOption === "100%"}
-                onChange={() => setPaymentOption("100%")}
-              />
-              Pay 100%
-            </label>
-          </div>
-                    {/* Billing Details */}
-                    <div className="booking-input">
-            <label htmlFor="billingName">Billing Name</label>
-            <input
-              type="text"
-              id="billingName"
-              name="billingName"
-              value={billingName}
-              onChange={(e) => setBillingName(e.target.value)} // Capture billing name
-              required
-            />
-          </div>
-          <div className="booking-input">
-            <label htmlFor="billingPhone">Billing Phone Number</label>
-            <input
-              type="tel"
-              id="billingPhone"
-              name="billingPhone"
-              value={billingPhone}
-              onChange={(e) => setBillingPhone(e.target.value)} // Capture billing phone
-              required
-            />
-          </div>
-</div>
-
-<div className="right-section">
-<div className="room-card">
-            <h3>Room Details</h3>
-            <img src={bookingData.image || '.jpg'} alt="Room Image" className="room-image" />
-            <div className="room-info">
-              <h4>{bookingData.packageName}</h4>
-              <p>{bookingData.desc}</p>
-              <span className="rating">★ {bookingData.rating}/5</span>
-            </div>
-
-            <div className="addons">
-              <h4>Add-ons</h4>
-              {bookingData.addons.map((addon) => (
-                <div className="addon-item" key={addon.id}>
-                  <img src={addon.image} alt="Addon Image" className="addon-image" />
-                  <span>{addon.name} - ₹{addon.price}</span>
+          {/* Payment Options Section */}
+          <div className="br-form-card">
+            <h2 className="br-card-title">Payment Options</h2>
+            
+            <div className="br-payment-options">
+              <label className={`br-payment-option ${paymentOption === "50%" ? "br-payment-active" : ""}`}>
+                <input
+                  type="radio"
+                  name="paymentOption"
+                  value="50%"
+                  checked={paymentOption === "50%"}
+                  onChange={() => setPaymentOption("50%")}
+                />
+                <div className="br-option-content">
+                  <span className="br-option-title">Pay 50% Now</span>
+                  <span className="br-option-amount">₹{(totalRoomPrice / 2).toFixed(2)}</span>
                 </div>
-              ))}
+              </label>
+              
+              <label className={`br-payment-option ${paymentOption === "100%" ? "br-payment-active" : ""}`}>
+                <input
+                  type="radio"
+                  name="paymentOption"
+                  value="100%"
+                  checked={paymentOption === "100%"}
+                  onChange={() => setPaymentOption("100%")}
+                />
+                <div className="br-option-content">
+                  <span className="br-option-title">Pay Full Amount</span>
+                  <span className="br-option-amount">₹{totalRoomPrice.toFixed(2)}</span>
+                </div>
+              </label>
             </div>
-</div>
+          </div>
+        </div>
 
-<div className="price-card">
-<h3>Price Breakdown</h3>
-<ul>
-              <li>Room: ₹{roomPrice}</li>
-              <li>
-                <ul>
+        {/* Order Summary Section */}
+        <div className="br-summary-section">
+          <div className="br-summary-card">
+            <h2 className="br-summary-title">Order Summary</h2>
+            
+            <div className="br-room-summary">
+              <div className="br-room-image-container">
+                <img src={bookingData?.image || 'default-room.jpg'} alt="Room" className="br-room-image" />
+              </div>
+              <div className="br-room-details">
+                <h3 className="br-room-name">{bookingData?.packageName}</h3>
+                <p className="br-room-description">{bookingData?.desc}</p>
+                <div className="br-room-rating">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <span key={i} className={`br-star ${i < Math.floor(bookingData?.rating || 0) ? "br-star-filled" : ""}`}>★</span>
+                  ))}
+                  <span>({bookingData?.rating || 0}/5)</span>
+                </div>
+              </div>
+            </div>
+            
+            {bookingData?.addons?.length > 0 && (
+              <div className="br-addons-summary">
+                <h4 className="br-addons-title">Add-ons</h4>
+                <ul className="br-addons-list">
                   {bookingData.addons.map((addon) => (
-                    <li key={addon.id}>{addon.name} - ₹{addon.price}</li>
+                    <li key={addon.id} className="br-addon-item">
+                      <img src={addon.image} alt={addon.name} className="br-addon-image" />
+                      <span className="br-addon-name">{addon.name}</span>
+                      <span className="br-addon-price">₹{addon.price}</span>
+                    </li>
                   ))}
                 </ul>
-              </li>
-              <li>Coupon: - ₹{discount}</li>
-              <li>
-                <strong>Total: ₹{totalRoomPrice.toFixed(2)}</strong>
-              </li>
-              <li>
-                <strong>Final Amount: ₹{getFinalAmount(paymentOption)}</strong>
-              </li>
-</ul>
-{paymentStatus === "successful" && <p>Payment was successful!</p>}
-{paymentStatus === "failed" && <p>Payment failed. Please try again.</p>}
-<button className="proceed-btn" onClick={handleProceedToCheckout}>Proceed to Checkout</button>
-<div className="guest-login-toggle">
-{isAuthenticated ? (
-<p>You are logged in as {email}</p>
-) : (
-<>
-<input 
-type="checkbox" 
-id="guestLogin" 
-onChange={handleGuestLoginChange} 
-/>
-<label htmlFor="guestLogin">Login as Guest</label>
-</>
-)}
-{!isAuthenticated && !isGuest && (
-<div className="guest-login-message">
-<p>You must be logged in to proceed, or use guest login.</p>
-</div>
-)}
-</div>
-</div>
-
-{orderDetails && (
-<div className="order-summary">
-<h3>Your Order Details</h3>
-<p>Package Name: {orderDetails.packageName}</p>
-<p>Check-in Date: {orderDetails.checkInDate}</p>
-<p>Guests:</p>
-<ul>
-{orderDetails.guestDetails.map((guest, index) => (
-<li key={index}>{`${guest.name}, Age: ${guest.age}`}</li>
-))}
-</ul>
-<p>Coupon Used: {orderDetails.couponUsed}</p>
-<p>Payment Option: {orderDetails.paymentOption}</p>
-<p>Total Price: ₹{orderDetails.totalPrice}</p>
-{orderDetails.specialRequest && (
-<p>Special Request: {orderDetails.specialRequest}</p>
-)}
-</div>
-)}
-</div>
-</div>
-</div>
+              </div>
+            )}
+            
+            <div className="br-price-breakdown">
+              <h4 className="br-price-title">Price Breakdown</h4>
+              <div className="br-price-row">
+                <span className="br-price-label">Room Price</span>
+                <span className="br-price-value">₹{roomPrice.toFixed(2)}</span>
+              </div>
+              
+              {bookingData?.addons?.length > 0 && (
+                <div className="br-price-row">
+                  <span className="br-price-label">Add-ons</span>
+                  <span className="br-price-value">₹{addonsPrice.toFixed(2)}</span>
+                </div>
+              )}
+              
+              {discount > 0 && (
+                <div className="br-price-row br-price-discount">
+                  <span className="br-price-label">Discount</span>
+                  <span className="br-price-value">- ₹{discount.toFixed(2)}</span>
+                </div>
+              )}
+              
+              <div className="br-price-row br-price-total">
+                <span className="br-price-label">Subtotal</span>
+                <span className="br-price-value">₹{totalRoomPrice.toFixed(2)}</span>
+              </div>
+              
+              <div className="br-price-row br-price-final">
+                <span className="br-price-label">Amount to Pay</span>
+                <span className="br-price-value">₹{getFinalAmount(paymentOption).toFixed(2)}</span>
+              </div>
+            </div>
+            
+            <div className="br-auth-notice">
+              {isAuthenticated ? (
+                <div className="br-logged-in-notice">
+                  <FaCheck /> Logged in as {email}
+                </div>
+              ) : (
+                <div className="br-guest-login-toggle">
+                  <input 
+                    type="checkbox" 
+                    id="guestLogin" 
+                    className="br-guest-checkbox"
+                    onChange={handleGuestLoginChange} 
+                  />
+                  <label htmlFor="guestLogin" className="br-guest-label">Continue as Guest</label>
+                  {!isGuest && (
+                    <p className="br-login-reminder">You'll need to create an account after booking</p>
+                  )}
+                </div>
+              )}
+            </div>
+            
+            <button 
+              className="br-checkout-btn"
+              onClick={handleProceedToCheckout}
+              disabled={roomsAvailable !== null && roomsAvailable <= 0}
+            >
+              Proceed to Checkout
+            </button>
+            
+            {paymentStatus === "successful" && (
+              <div className="br-payment-success">
+                <FaCheck /> Payment was successful!
+              </div>
+            )}
+            {paymentStatus === "failed" && (
+              <div className="br-payment-error">
+                <FaTimes /> Payment failed. Please try again.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

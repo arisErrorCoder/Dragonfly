@@ -259,7 +259,9 @@ nav h1 {
   max-width: 100%;
   list-style: none;
   padding: 0;
-  margin-top: 300px;
+  left: 15px;
+  top: 50px;
+  margin-top: 0px;
   height: 250px;
   overflow-y: auto;
   z-index: 1000;

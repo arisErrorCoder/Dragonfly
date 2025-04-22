@@ -500,10 +500,10 @@ const sendOrderEmails = (orderData, isSuccess) => {
                           <td style="padding: 8px 0;">${formatCurrency(amount)}</td>
                       </tr>
                       <tr>
-                          <td style="padding: 8px 0;"><strong>Payment Status:</strong></td>
-                          <td style="padding: 8px 0; color: ${isSuccess ? '#4CAF50' : '#FF6347'}; font-weight: bold;">
-                              ${paymentDetails?.message || 'N/A'}
-                          </td>
+                        //   <td style="padding: 8px 0;"><strong>Payment Status:</strong></td>
+                        //   <td style="padding: 8px 0; color: ${isSuccess ? '#4CAF50' : '#FF6347'}; font-weight: bold;">
+                        //       ${paymentDetails?.message || 'N/A'}
+                        //   </td>
                       </tr>
                   </table>
               </div>

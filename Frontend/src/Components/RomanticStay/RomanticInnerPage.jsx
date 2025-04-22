@@ -52,22 +52,22 @@ const RomanticInnerPage = () => {
   const [mainImage, setMainImage] = useState(product.images || image1);
   const [images , SetImages]=useState(product.images)
   const cards = [
-    // {
-    //   title: "What's Included",
-    //   content: <ul>{product.inclusions.map((item, index) => <li  className='cardss-li' key={index}>{item}</li>)}</ul>,
-    // },
-    // {
-    //   title: "What's Exclusion",
-    //   content: <ul>{product.exclusions.map((item, index) => <li  className='cardss-li' key={index}>{item}</li>)}</ul>,
-    // },
+    {
+      title: "What's Included",
+      content: <ul>{product.inclusions.map((item, index) => <li  className='cardss-li' key={index}>{item}</li>)}</ul>,
+    },
+    {
+      title: "What's Exclusion",
+      content: <ul>{product.exclusions.map((item, index) => <li  className='cardss-li' key={index}>{item}</li>)}</ul>,
+    },
     {
       title: "Cancellation and Refund Policy",
-      content: "Details about cancellation and refund policy...",
+      content: <ul>{product.Cancellation_and_Refund_Policy.map((item, index) => <li className='cardss-li' key={index}>{item}</li>)}</ul>,
     },
-    // {
-    //   title: "Other Useful Info",
-    //   content: <ul>{product.special_features.map((item, index) => <li className='cardss-li' key={index}>{item}</li>)}</ul>,
-    // },
+    {
+      title: "Other Useful Info",
+      content: <ul>{product.special_features.map((item, index) => <li className='cardss-li' key={index}>{item}</li>)}</ul>,
+    },
   ];
   
   
@@ -180,6 +180,7 @@ const handleFormSubmit = async (e) => {
   
     const bookingData = {
       packageName: product.name,
+      packageType:product.packageType,
       image: mainImage,
       desc: product.description,
       price:  packagePrice, // Send the total price instead of just product.price
