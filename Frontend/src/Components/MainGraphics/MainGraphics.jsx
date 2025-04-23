@@ -24,7 +24,7 @@ const MainGraphics = () => {
         { venue: 'any', bestFor: 'birthday', image: birthdays },
         { venue: 'any', bestFor: 'anniversary', image: anniversary },
         { venue: 'any', bestFor: 'proposal', image: proposal },
-        { venue: 'any', bestFor: 'moviedate', image: moviedate },
+        { venue: 'any', bestFor: 'movie date', image: moviedate },
     ];
 
     const handleGraphicClick = (venueType, bestFor) => {
