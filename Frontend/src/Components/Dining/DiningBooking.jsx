@@ -136,7 +136,7 @@ const DiningBooking = () => {
             <option value="birthday">Birthday</option>
             <option value="anniversary">Anniversary</option>
             <option value="proposal">Proposal</option>
-            <option value="moviedate">Movie Date</option>
+            <option value="movie date">Movie Date</option>
             <option value="group">Group</option>
           </select>
   
