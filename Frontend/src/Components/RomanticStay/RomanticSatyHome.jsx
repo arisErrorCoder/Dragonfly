@@ -104,17 +104,6 @@ const RomanticSatyHome = () => {
       <aside className="Sidebar">
         <h2>Filter Options</h2>
         <div className="filter-options">
-          <label htmlFor="time-interval">Duration:</label>
-          <select
-            id="time-interval"
-            value={timeInterval}
-            onChange={(e) => setTimeInterval(e.target.value)}
-          >
-            <option value="any">Any</option>
-            <option value="3 HOURS">3 hours</option>
-            <option value="4 HOURS">4 hours</option>
-          </select>
-  
           <label htmlFor="venue">Venue Type:</label>
           <select
             id="venue"
