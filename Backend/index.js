@@ -76,18 +76,18 @@ const transporter = nodemailer.createTransport({
 
   // POST route to create an order
   app.post('/create-order', async (req, res) => {
-      const { name, mobileNumber, amount, userId, productDetails, email } = req.body;
-      const orderId = generateOrderId();  
-      try {
-          // First check room availability before proceeding
-          if (productDetails.venue && productDetails.checkInDate && productDetails.timeSlot) {
+    const { name, mobileNumber, amount, userId, productDetails, email } = req.body;
+    const orderId = generateOrderId();  
+    try {
+        // First check room availability before proceeding
+        if (productDetails.venue && productDetails.checkInDate && productDetails.timeSlot) {
             const venueRef = db.collection('venues').doc(productDetails.venue);
             const venueDoc = await venueRef.get();
             
             if (!venueDoc.exists) {
-              return res.status(400).json({ error: 'Venue not found' });
+                return res.status(400).json({ error: 'Venue not found' });
             }
-      
+    
             const venueData = venueDoc.data();
             const dateStr = productDetails.checkInDate;
             const timeSlot = productDetails.timeSlot;
@@ -97,226 +97,184 @@ const transporter = nodemailer.createTransport({
             const availableRooms = venueData.totalRooms - bookedRooms;
             
             if (availableRooms <= 0) {
-              return res.status(400).json({ 
-                error: 'No rooms available for selected date and time slot',
-                code: 'ROOMS_UNAVAILABLE'
-              });
+                return res.status(400).json({ 
+                    error: 'No rooms available for selected date and time slot',
+                    code: 'ROOMS_UNAVAILABLE'
+                });
             }
-      
-            // Use transaction to ensure atomic update
-            await db.runTransaction(async (transaction) => {
-              // Re-read the document in the transaction
-              const freshVenueDoc = await transaction.get(venueRef);
-              const freshVenueData = freshVenueDoc.data();
-              
-              const freshBooked = freshVenueData.bookedRooms?.[dateStr]?.[timeSlot] || 0;
-              const freshAvailable = freshVenueData.totalRooms - freshBooked;
-              
-              if (freshAvailable <= 0) {
-                throw new Error('No availability left');
-              }
-      
-              // Perform the update
-              transaction.update(venueRef, {
-                [`bookedRooms.${dateStr}.${timeSlot}`]: admin.firestore.FieldValue.increment(1),
-                [`pendingBookings.${orderId}`]: {
-                  date: dateStr,
-                  timeSlot: timeSlot,
-                  createdAt: admin.firestore.FieldValue.serverTimestamp()
-                }
-              });
-            });
-          }
-  
-          // Payment payload setup
-          const paymentPayload = {
-              merchantId: MERCHANT_ID,
-              merchantUserId: name,
-              mobileNumber: mobileNumber,
-              amount: amount * 100,
-              merchantTransactionId: orderId,
-              redirectUrl: `${redirectUrl}/?id=${orderId}`,
-              redirectMode: 'POST',
-              paymentInstrument: {
-                  type: 'PAY_PAGE'
-              }
-          };
-  
-          const payload = Buffer.from(JSON.stringify(paymentPayload)).toString('base64');
-          const keyIndex = 1;
-          const string = payload + '/pg/v1/pay' + MERCHANT_KEY;
-          const sha256 = crypto.createHash('sha256').update(string).digest('hex');
-          const checksum = sha256 + '###' + keyIndex;
-  
-          const option = {
-              method: 'POST',
-              url: MERCHANT_BASE_URL,
-              headers: {
-                  accept: 'application/json',
-                  'Content-Type': 'application/json',
-                  'X-VERIFY': checksum
-              },
-              data: {
-                  request: payload
-              }
-          };
-  
-          const response = await axios.request(option);
-          const paymentUrl = response.data.data.instrumentResponse.redirectInfo.url;
-  
-          // Save order details to Firestore (in a pending state)
-         await db.collection('orders').doc(orderId).set({
-    name,
-    mobileNumber,
-    amount,
-    userId,
-    productDetails: {
-        ...productDetails,
-        orderId: orderId  // Add orderId to productDetails
-    },
-    email,
-    status: 'pending',
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    venue: productDetails.venue || null,
-    checkInDate: productDetails.checkInDate || null,
-    timeSlot: productDetails.timeSlot || null
+    
+            // Only mark the pending booking in the order document
+            // Don't update the venue document yet - wait for successful payment
+        }
+
+        // Payment payload setup
+        const paymentPayload = {
+            merchantId: MERCHANT_ID,
+            merchantUserId: name,
+            mobileNumber: mobileNumber,
+            amount: amount * 100,
+            merchantTransactionId: orderId,
+            redirectUrl: `${redirectUrl}/?id=${orderId}`,
+            redirectMode: 'POST',
+            paymentInstrument: {
+                type: 'PAY_PAGE'
+            }
+        };
+
+        const payload = Buffer.from(JSON.stringify(paymentPayload)).toString('base64');
+        const keyIndex = 1;
+        const string = payload + '/pg/v1/pay' + MERCHANT_KEY;
+        const sha256 = crypto.createHash('sha256').update(string).digest('hex');
+        const checksum = sha256 + '###' + keyIndex;
+
+        const option = {
+            method: 'POST',
+            url: MERCHANT_BASE_URL,
+            headers: {
+                accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-VERIFY': checksum
+            },
+            data: {
+                request: payload
+            }
+        };
+
+        const response = await axios.request(option);
+        const paymentUrl = response.data.data.instrumentResponse.redirectInfo.url;
+
+        // Save order details to Firestore (in a pending state)
+        await db.collection('orders').doc(orderId).set({
+            name,
+            mobileNumber,
+            amount,
+            userId,
+            productDetails: {
+                ...productDetails,
+                orderId: orderId
+            },
+            email,
+            status: 'pending',
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            venue: productDetails.venue || null,
+            checkInDate: productDetails.checkInDate || null,
+            timeSlot: productDetails.timeSlot || null
+        });
+
+        res.status(200).json({ 
+            msg: "OK", 
+            url: paymentUrl, 
+            orderId: orderId 
+        });
+
+    } catch (error) {
+        console.error("Error in payment processing:", error);
+        
+        // No need to rollback venue changes since we didn't make any
+        res.status(500).json({ 
+            error: error.response?.data?.message || 'Failed to initiate payment',
+            code: error.response?.data?.code || 'PAYMENT_ERROR'
+        });
+    }
 });
-  
-          res.status(200).json({ 
-              msg: "OK", 
-              url: paymentUrl, 
-              orderId: orderId 
-          });
-  
-      } catch (error) {
-          console.error("Error in payment processing:", error);
-          
-          // If we had reserved a room, release it
-          if (orderId && productDetails?.venue) {
-              try {
-                  const venueRef = db.collection('venues').doc(productDetails.venue);
-                  await venueRef.update({
-                      [`bookedRooms.${productDetails.checkInDate}.${productDetails.timeSlot}`]: 
-                          admin.firestore.FieldValue.increment(-1),
-                      [`pendingBookings.${orderId}`]: admin.firestore.FieldValue.delete()
-                  });
-              } catch (rollbackError) {
-                  console.error("Failed to rollback room reservation:", rollbackError);
-              }
-          }
-  
-          res.status(500).json({ 
-              error: error.response?.data?.message || 'Failed to initiate payment',
-              code: error.response?.data?.code || 'PAYMENT_ERROR'
-          });
-      }
-  });
-  
-  // POST route to check payment status
-  app.post('/status', async (req, res) => {
-      const merchantTransactionId = req.query.id;
-      const keyIndex = 1;
-      const string = `/pg/v1/status/${MERCHANT_ID}/${merchantTransactionId}` + MERCHANT_KEY;
-      const sha256 = crypto.createHash('sha256').update(string).digest('hex');
-      const checksum = sha256 + '###' + keyIndex;
-  
-      const option = {
-          method: 'GET',
-          url: `${MERCHANT_STATUS_URL}/${MERCHANT_ID}/${merchantTransactionId}`,
-          headers: {
-              accept: 'application/json',
-              'Content-Type': 'application/json',
-              'X-VERIFY': checksum,
-              'X-MERCHANT-ID': MERCHANT_ID
-          },
-      };
-  
-      try {
-          const response = await axios.request(option);
-          const orderRef = db.collection('orders').doc(merchantTransactionId);
-          const orderSnapshot = await orderRef.get();
-  
-          if (!orderSnapshot.exists) {
-              throw new Error('Order not found');
-          }
-  
-          const orderData = orderSnapshot.data();
-  
-          if (response.data.success === true) {
-              // Payment succeeded - confirm the booking
-              await orderRef.update({
-                  status: 'success',
-                  paymentDetails: response.data,
-                  updatedAt: admin.firestore.FieldValue.serverTimestamp()
-              });
-  
-              // Clean up pending booking status from venue
-              if (orderData.venue && orderData.checkInDate && orderData.timeSlot) {
-                  const venueRef = db.collection('venues').doc(orderData.venue);
-                  await venueRef.update({
-                      [`pendingBookings.${merchantTransactionId}`]: admin.firestore.FieldValue.delete()
-                  });
-              }
-  
-              // Send success emails
-              await sendOrderEmails(orderData, true);
-              
-              return res.redirect(successUrl);
-          } else {
-              // Payment failed - release the room reservation
-              if (orderData.venue && orderData.checkInDate && orderData.timeSlot) {
-                  const venueRef = db.collection('venues').doc(orderData.venue);
-                  await venueRef.update({
-                      [`bookedRooms.${orderData.checkInDate}.${orderData.timeSlot}`]: 
-                          admin.firestore.FieldValue.increment(-1),
-                      [`pendingBookings.${merchantTransactionId}`]: admin.firestore.FieldValue.delete()
-                  });
-              }
-  
-              await orderRef.update({
-                  status: 'failed',
-                  paymentDetails: response.data,
-                  updatedAt: admin.firestore.FieldValue.serverTimestamp()
-              });
-  
-              // Send failure emails
-              await sendOrderEmails(orderData, false);
-              
-              return res.redirect(failureUrl);
-          }
-          
-      } catch (error) {
-          console.error('Error fetching payment status:', error);
-          
-          // If we can't verify payment status, mark as failed to be safe
-          try {
-              const orderRef = db.collection('orders').doc(merchantTransactionId);
-              await orderRef.update({
-                  status: 'failed',
-                  error: error.message,
-                  updatedAt: admin.firestore.FieldValue.serverTimestamp()
-              });
-  
-              // Release any reserved rooms
-              const orderSnapshot = await orderRef.get();
-              if (orderSnapshot.exists) {
-                  const orderData = orderSnapshot.data();
-                  if (orderData.venue && orderData.checkInDate && orderData.timeSlot) {
-                      const venueRef = db.collection('venues').doc(orderData.venue);
-                      await venueRef.update({
-                          [`bookedRooms.${orderData.checkInDate}.${orderData.timeSlot}`]: 
-                              admin.firestore.FieldValue.increment(-1),
-                          [`pendingBookings.${merchantTransactionId}`]: admin.firestore.FieldValue.delete()
-                      });
-                  }
-              }
-          } catch (dbError) {
-              console.error('Failed to update order status:', dbError);
-          }
-          
-          return res.redirect(failureUrl);
-      }
-  });
+
+// POST route to check payment status
+app.post('/status', async (req, res) => {
+    const merchantTransactionId = req.query.id;
+    const keyIndex = 1;
+    const string = `/pg/v1/status/${MERCHANT_ID}/${merchantTransactionId}` + MERCHANT_KEY;
+    const sha256 = crypto.createHash('sha256').update(string).digest('hex');
+    const checksum = sha256 + '###' + keyIndex;
+
+    const option = {
+        method: 'GET',
+        url: `${MERCHANT_STATUS_URL}/${MERCHANT_ID}/${merchantTransactionId}`,
+        headers: {
+            accept: 'application/json',
+            'Content-Type': 'application/json',
+            'X-VERIFY': checksum,
+            'X-MERCHANT-ID': MERCHANT_ID
+        },
+    };
+
+    try {
+        const response = await axios.request(option);
+        const orderRef = db.collection('orders').doc(merchantTransactionId);
+        const orderSnapshot = await orderRef.get();
+
+        if (!orderSnapshot.exists) {
+            throw new Error('Order not found');
+        }
+
+        const orderData = orderSnapshot.data();
+
+        if (response.data.success === true) {
+            // Payment succeeded - now update the venue document
+            if (orderData.venue && orderData.checkInDate && orderData.timeSlot) {
+                const venueRef = db.collection('venues').doc(orderData.venue);
+                
+                // Use transaction to ensure atomic update
+                await db.runTransaction(async (transaction) => {
+                    // Re-read the document in the transaction
+                    const freshVenueDoc = await transaction.get(venueRef);
+                    const freshVenueData = freshVenueDoc.data();
+                    
+                    const freshBooked = freshVenueData.bookedRooms?.[orderData.checkInDate]?.[orderData.timeSlot] || 0;
+                    const freshAvailable = freshVenueData.totalRooms - freshBooked;
+                    
+                    if (freshAvailable <= 0) {
+                        throw new Error('No availability left');
+                    }
+
+                    // Perform the update
+                    transaction.update(venueRef, {
+                        [`bookedRooms.${orderData.checkInDate}.${orderData.timeSlot}`]: admin.firestore.FieldValue.increment(1)
+                    });
+                });
+            }
+
+            await orderRef.update({
+                status: 'success',
+                paymentDetails: response.data,
+                updatedAt: admin.firestore.FieldValue.serverTimestamp()
+            });
+
+            // Send success emails
+            await sendOrderEmails(orderData, true);
+            
+            return res.redirect(successUrl);
+        } else {
+            // Payment failed - no need to update venue document since we didn't reserve earlier
+            await orderRef.update({
+                status: 'failed',
+                paymentDetails: response.data,
+                updatedAt: admin.firestore.FieldValue.serverTimestamp()
+            });
+
+            // Send failure emails
+            await sendOrderEmails(orderData, false);
+            
+            return res.redirect(failureUrl);
+        }
+        
+    } catch (error) {
+        console.error('Error fetching payment status:', error);
+        
+        // If we can't verify payment status, mark as failed to be safe
+        try {
+            const orderRef = db.collection('orders').doc(merchantTransactionId);
+            await orderRef.update({
+                status: 'failed',
+                error: error.message,
+                updatedAt: admin.firestore.FieldValue.serverTimestamp()
+            });
+        } catch (dbError) {
+            console.error('Failed to update order status:', dbError);
+        }
+        
+        return res.redirect(failureUrl);
+    }
+});
   
   // Additional endpoint to handle expired pending bookings
   app.post('/cleanup-pending-bookings', async (req, res) => {
