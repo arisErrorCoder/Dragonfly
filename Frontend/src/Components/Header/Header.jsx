@@ -217,7 +217,7 @@ const Header = () => {
                         <img src={packagesIcon} alt="Group Packages Icon" />
                         Dragonfly Surprises
                     </li>
-                    <li onClick={() => handleNavigation('/drognflyhotel')}>
+                    <li onClick={() => handleNavigation('/')}>
                         <img src={recommendationsIcon} alt="Dragonfly Hotel" />
                         Dragonfly Hotel
                     </li>
