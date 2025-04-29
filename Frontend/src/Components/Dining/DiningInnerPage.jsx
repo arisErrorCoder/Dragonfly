@@ -316,12 +316,12 @@ const handleFormSubmit = async (e) => {
           </p>
           <p className="product-pricee">₹{pkg.price}/-</p>
           <div className="button-actions">
-            <a href="tel:9944894722" className="call">
+            <a href="tel:9833001623" className="call">
               <button>
                 <FontAwesomeIcon icon={faPhone} /> Tap to call
               </button>
             </a>
-            <a href="https://wa.me/9944894722" className="text">
+            <a href="https://wa.me/9833001623" className="text">
               <button>
                 <FontAwesomeIcon icon={faComment} /> Tap to text
               </button>

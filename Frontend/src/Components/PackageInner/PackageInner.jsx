@@ -434,12 +434,12 @@ const PackageInner = () => {
     <h4>{packageData.description}</h4>
     <p className="product-pricee">₹{packageData.price}/-</p>
     <div className="button-actions">
-      <a href="tel:9944894722" className="call-button">
+      <a href="tel:9833001623" className="call-button">
         <button>
           <FontAwesomeIcon icon={faPhone} /> Tap to call
         </button>
       </a>
-      <a href="https://wa.me/9944894722" className="text-button">
+      <a href="https://wa.me/9833001623" className="text-button">
         <button>
           <FontAwesomeIcon icon={faComment} /> Tap to text
         </button>
