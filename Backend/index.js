@@ -457,12 +457,6 @@ const sendOrderEmails = (orderData, isSuccess) => {
                           <td style="padding: 8px 0;"><strong>Total Amount:</strong></td>
                           <td style="padding: 8px 0;">${formatCurrency(amount)}</td>
                       </tr>
-                      <tr>
-                        //   <td style="padding: 8px 0;"><strong>Payment Status:</strong></td>
-                        //   <td style="padding: 8px 0; color: ${isSuccess ? '#4CAF50' : '#FF6347'}; font-weight: bold;">
-                        //       ${paymentDetails?.message || 'N/A'}
-                        //   </td>
-                      </tr>
                   </table>
               </div>
               
@@ -560,47 +554,39 @@ const sendOrderEmails = (orderData, isSuccess) => {
                   </div>
                   
                   <div style="flex: 1;">
-                      <h3 style="color: #2c3e50; margin-top: 0;">Payment Details</h3>
-                      <table style="width: 100%; border-collapse: collapse;">
-                          <tr>
-                              <td style="padding: 8px 0; width: 40%;"><strong>Amount:</strong></td>
-                              <td style="padding: 8px 0;">${formatCurrency(amount)}</td>
-                          </tr>
-                          <tr>
-                    <td style="padding: 8px 0;"><strong>Transaction ID:</strong></td>
-<td style="padding: 8px 0;">${
-            paymentDetails?.transactionId || 
-            paymentDetails?.data?.transactionId || 
-            paymentDetails?.response?.transactionId || 
-            'N/A'
-        }</td>                          </tr>
-                          <tr>
-                    <td style="padding: 8px 0;"><strong>Payment Method:</strong></td>
-<td style="padding: 8px 0;">${
-            paymentDetails?.paymentInstrument?.type || 
-            paymentDetails?.data?.paymentInstrument?.type || 
-            paymentDetails?.response?.paymentInstrument?.type || 
-            'N/A'
-        }</td>                          </tr>
-                          <tr>
-                    <td style="padding: 8px 0;"><strong>Payment Status:</strong></td>
-                     <td style="padding: 8px 0; color: ${isSuccess ? '#4CAF50' : '#FF6347'}; font-weight: bold;">
-            ${
-                (paymentDetails?.code || 
-                paymentDetails?.status || 
-                paymentDetails?.response?.code || 
-                'N/A')
-            } - ${
-                (paymentDetails?.message || 
-                paymentDetails?.statusMessage || 
-                paymentDetails?.response?.message || 
-                'N/A')
-            }
-        </td>
-                          </tr>
-                      </table>
-                  </div>
-              </div>
+                <h3 style="color: #2c3e50; margin-top: 0;">Payment Details</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 8px 0; width: 40%;"><strong>Amount Paid:</strong></td>
+                        <td style="padding: 8px 0;">${formatCurrency(paymentDetails.data.amount / 100)}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0;"><strong>Total Amount:</strong></td>
+                        <td style="padding: 8px 0;">${formatCurrency(productDetails.price)}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0;"><strong>Remaining Amount:</strong></td>
+                        <td style="padding: 8px 0; font-weight: bold; color: #FF6347;">
+                            ${formatCurrency(productDetails.price - (paymentDetails.data.amount / 100))}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0;"><strong>Transaction ID:</strong></td>
+                        <td style="padding: 8px 0;">${paymentDetails.data.transactionId || 'N/A'}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0;"><strong>Payment Status:</strong></td>
+                        <td style="padding: 8px 0; color: ${isSuccess ? '#4CAF50' : '#FF6347'}; font-weight: bold;">
+                            ${paymentDetails.code} - ${paymentDetails.message}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0;"><strong>Payment Option:</strong></td>
+                        <td style="padding: 8px 0;">${productDetails.paymentOption || 'Full Payment'}</td>
+                    </tr>
+                </table>
+            </div>
+            </div>
               
               <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
                   <h3 style="margin-top: 0; color: #2c3e50;">Booking Details</h3>
