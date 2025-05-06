@@ -176,8 +176,12 @@ const Calendar = () => {
         name: userName,
         mobileNumber: userPhone,
         bookingDate: new Date().toISOString(),
-        status: 'success'
+        status: 'success',
+        paymentDetails: {
+          code: "PAYMENT_SUCCESS"
+        }
       };
+      
 
       await addDoc(collection(fireDB, 'orders'), bookingData);
       
