@@ -179,6 +179,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // POST route to check payment status
+// POST route to check payment status
 app.post('/status', async (req, res) => {
     const merchantTransactionId = req.query.id;
     const keyIndex = 1;
@@ -207,15 +208,33 @@ app.post('/status', async (req, res) => {
         }
 
         const orderData = orderSnapshot.data();
+        const isSuccess = response.data.success === true;
 
-        if (response.data.success === true) {
-            // Payment succeeded - now update the venue document
+        // Prepare common update data
+        const updateData = {
+            status: isSuccess ? 'success' : 'failed',
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            paymentDetails: {
+                code: response.data.code || null,
+                message: response.data.message || null,
+                success: response.data.success || false,
+                data: {
+                    amount: response.data.data?.amount || response.data.amount || null,
+                    transactionId: response.data.data?.transactionId || response.data.transactionId || null,
+                    paymentMethod: response.data.data?.paymentInstrument?.type || null
+                }
+            }
+        };
+
+        // Remove undefined values
+        const cleanUpdate = JSON.parse(JSON.stringify(updateData));
+
+        if (isSuccess) {
+            // Payment succeeded - update venue availability
             if (orderData.venue && orderData.checkInDate && orderData.timeSlot) {
                 const venueRef = db.collection('venues').doc(orderData.venue);
                 
-                // Use transaction to ensure atomic update
                 await db.runTransaction(async (transaction) => {
-                    // Re-read the document in the transaction
                     const freshVenueDoc = await transaction.get(venueRef);
                     const freshVenueData = freshVenueDoc.data();
                     
@@ -226,41 +245,27 @@ app.post('/status', async (req, res) => {
                         throw new Error('No availability left');
                     }
 
-                    // Perform the update
                     transaction.update(venueRef, {
                         [`bookedRooms.${orderData.checkInDate}.${orderData.timeSlot}`]: admin.firestore.FieldValue.increment(1)
                     });
                 });
             }
-
-            await orderRef.update({
-                status: 'success',
-                paymentDetails: response.data,
-                updatedAt: admin.firestore.FieldValue.serverTimestamp()
-            });
-
-            // Send success emails
-            await sendOrderEmails(orderData, true);
-            
-            return res.redirect(successUrl);
-        } else {
-            // Payment failed - no need to update venue document since we didn't reserve earlier
-            await orderRef.update({
-                status: 'failed',
-                paymentDetails: response.data,
-                updatedAt: admin.firestore.FieldValue.serverTimestamp()
-            });
-
-            // Send failure emails
-            await sendOrderEmails(orderData, false);
-            
-            return res.redirect(failureUrl);
         }
+
+        // Update order document
+        await orderRef.update(cleanUpdate);
+
+        // Send appropriate emails
+        await sendOrderEmails({
+            ...orderData,
+            ...cleanUpdate
+        }, isSuccess);
+        
+        return res.redirect(isSuccess ? successUrl : failureUrl);
         
     } catch (error) {
         console.error('Error fetching payment status:', error);
         
-        // If we can't verify payment status, mark as failed to be safe
         try {
             const orderRef = db.collection('orders').doc(merchantTransactionId);
             await orderRef.update({
@@ -340,6 +345,13 @@ const sendOrderEmails = (orderData, isSuccess) => {
       createdAt, 
       updatedAt 
   } = orderData;
+
+  // Safely access payment details with fallbacks
+  const paymentData = paymentDetails?.data || {};
+  const transactionId = paymentData.transactionId || paymentDetails?.transactionId || 'N/A';
+  const paidAmount = paymentData.amount ? paymentData.amount / 100 : amount;
+  const totalAmount = productDetails.price || amount * 2; // Assuming 50% payment if price exists
+  const remainingAmount = totalAmount - paidAmount;
   
   // Improved date formatting
   const formatDate = (dateString) => {
@@ -558,31 +570,31 @@ const sendOrderEmails = (orderData, isSuccess) => {
                 <table style="width: 100%; border-collapse: collapse;">
                     <tr>
                         <td style="padding: 8px 0; width: 40%;"><strong>Amount Paid:</strong></td>
-                        <td style="padding: 8px 0;">${formatCurrency(paymentDetails.data.amount / 100)}</td>
+                          <td style="padding: 8px 0;">${formatCurrency(paidAmount)}</td>
                     </tr>
                     <tr>
                         <td style="padding: 8px 0;"><strong>Total Amount:</strong></td>
-                        <td style="padding: 8px 0;">${formatCurrency(productDetails.price)}</td>
+                          <td style="padding: 8px 0;">${formatCurrency(totalAmount)}</td>
                     </tr>
                     <tr>
                         <td style="padding: 8px 0;"><strong>Remaining Amount:</strong></td>
                         <td style="padding: 8px 0; font-weight: bold; color: #FF6347;">
-                            ${formatCurrency(productDetails.price - (paymentDetails.data.amount / 100))}
+                              ${remainingAmount > 0 ? formatCurrency(remainingAmount) : 'Fully Paid'}
                         </td>
                     </tr>
                     <tr>
                         <td style="padding: 8px 0;"><strong>Transaction ID:</strong></td>
-                        <td style="padding: 8px 0;">${paymentDetails.data.transactionId || 'N/A'}</td>
+                          <td style="padding: 8px 0;">${transactionId}</td>
                     </tr>
                     <tr>
                         <td style="padding: 8px 0;"><strong>Payment Status:</strong></td>
                         <td style="padding: 8px 0; color: ${isSuccess ? '#4CAF50' : '#FF6347'}; font-weight: bold;">
-                            ${paymentDetails.code} - ${paymentDetails.message}
+                              ${paymentDetails?.code || 'N/A'} - ${paymentDetails?.message || 'N/A'}
                         </td>
                     </tr>
                     <tr>
                         <td style="padding: 8px 0;"><strong>Payment Option:</strong></td>
-                        <td style="padding: 8px 0;">${productDetails.paymentOption || 'Full Payment'}</td>
+                          <td style="padding: 8px 0;">${productDetails.paymentOption || 'Full Payment'}</td>
                     </tr>
                 </table>
             </div>
