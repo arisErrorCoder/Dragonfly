@@ -568,17 +568,35 @@ const sendOrderEmails = (orderData, isSuccess) => {
                           </tr>
                           <tr>
                     <td style="padding: 8px 0;"><strong>Transaction ID:</strong></td>
-                    <td style="padding: 8px 0;">${paymentDetails?.transactionId || paymentDetails?.data?.transactionId || 'N/A'}</td>
-                          </tr>
+<td style="padding: 8px 0;">${
+            paymentDetails?.transactionId || 
+            paymentDetails?.data?.transactionId || 
+            paymentDetails?.response?.transactionId || 
+            'N/A'
+        }</td>                          </tr>
                           <tr>
                     <td style="padding: 8px 0;"><strong>Payment Method:</strong></td>
-                    <td style="padding: 8px 0;">${paymentDetails?.paymentInstrument?.type || paymentDetails?.data?.paymentInstrument?.type || 'N/A'}</td>
-                          </tr>
+<td style="padding: 8px 0;">${
+            paymentDetails?.paymentInstrument?.type || 
+            paymentDetails?.data?.paymentInstrument?.type || 
+            paymentDetails?.response?.paymentInstrument?.type || 
+            'N/A'
+        }</td>                          </tr>
                           <tr>
                     <td style="padding: 8px 0;"><strong>Payment Status:</strong></td>
-                    <td style="padding: 8px 0; color: ${isSuccess ? '#4CAF50' : '#FF6347'}; font-weight: bold;">
-                        ${paymentDetails?.code || paymentDetails?.status || 'N/A'} - ${paymentDetails?.message || paymentDetails?.statusMessage || 'N/A'}
-                    </td>
+                     <td style="padding: 8px 0; color: ${isSuccess ? '#4CAF50' : '#FF6347'}; font-weight: bold;">
+            ${
+                (paymentDetails?.code || 
+                paymentDetails?.status || 
+                paymentDetails?.response?.code || 
+                'N/A')
+            } - ${
+                (paymentDetails?.message || 
+                paymentDetails?.statusMessage || 
+                paymentDetails?.response?.message || 
+                'N/A')
+            }
+        </td>
                           </tr>
                       </table>
                   </div>
