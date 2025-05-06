@@ -1,201 +1,361 @@
-
-
-.booking-page-container {
+/* Base Styles */
+.bliss-booking-container {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 20px;
-  font-family: Arial, sans-serif;
+  color: #333;
 }
 
-.booking-page-title {
-  text-align: center;
-  font-size: 2em;
+/* Header Styles */
+.bliss-booking-header {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 30px;
+}
+
+.bliss-booking-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #2c3e50;
   margin-bottom: 20px;
 }
 
-.booking-page-search {
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-.booking-page-search-input {
-  padding: 10px;
-  font-size: 1rem;
-  width: 80%;
+.bliss-booking-search {
+  position: relative;
   max-width: 500px;
-  border-radius: 5px;
-  border: 1px solid #ddd;
 }
 
-.booking-page-table {
+.bliss-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #7f8c8d;
+}
+
+.bliss-search-input {
+  width: 100%;
+  padding: 12px 20px 12px 40px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.bliss-search-input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+/* Table Styles */
+.bliss-booking-table-container {
+  overflow-x: auto;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.bliss-booking-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.booking-page-table th,
-.booking-page-table td {
-  padding: 12px;
+.bliss-booking-table th {
   text-align: left;
-  border-bottom: 1px solid #ddd;
-}
-
-.booking-page-table th {
-  background-color: #f4f4f4;
-  font-weight: bold;
-}
-
-.booking-page-table tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-.booking-page-view-btn {
-  padding: 6px 12px;
-  background-color: #007BFF;
-  color: white;
-  border: none;
+  padding: 15px;
+  font-weight: 600;
+  color: #2c3e50;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
   cursor: pointer;
-  border-radius: 5px;
+  transition: background 0.2s;
+  white-space: nowrap;
 }
 
-.booking-page-view-btn:hover {
-  background-color: #0056b3;
+.bliss-booking-table th:hover {
+  background: #e9ecef;
 }
 
-.booking-page-modal-overlay {
+.bliss-booking-row td {
+  padding: 15px;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: middle;
+}
+
+.bliss-booking-row:hover {
+  background-color: #f8fbfe;
+}
+
+.bliss-order-id {
+  color: #337d18;
+  font-weight: 500;
+}
+
+.bliss-customer-name {
+  font-weight: 500;
+}
+
+.bliss-payment-status {
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.bliss-paid {
+  color: #000000;
+}
+
+.bliss-pending {
+  color: #0b0a07;
+}
+
+.bliss-checkin-date {
+  white-space: nowrap;
+}
+
+.bliss-view-btn {
+  background: #e3f2fd;
+  color: #1976d2;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s;
+}
+
+.bliss-view-btn:hover {
+  background: #bbdefb;
+}
+
+.bliss-no-results td {
+  padding: 30px;
+  text-align: center;
+  color: #7f8c8d;
+}
+
+/* Modal Styles */
+.bliss-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   z-index: 1000;
 }
 
-.booking-page-modal {
-  background-color: white;
+.bliss-modal {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  animation: bliss-modal-fade 0.3s ease;
+}
+
+@keyframes bliss-modal-fade {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.bliss-modal-header {
   padding: 20px;
-  width: 80%;
-  max-width: 600px;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid #e0e0e0;
   position: relative;
 }
 
-.booking-page-close-btn {
+.bliss-modal-title {
+  margin: 0;
+  font-size: 20px;
+  color: #2c3e50;
+}
+
+.bliss-order-id-label {
+  font-size: 13px;
+  color: #7f8c8d;
+  margin-top: 5px;
+}
+
+.bliss-modal-close {
   position: absolute;
-  top: 10px;
-  left: 250px;
-  font-size: 1.5em;
-  background: none;
+  top: 20px;
+  right: 20px;
   border: none;
-  color: black;
   cursor: pointer;
+  padding: 4px;
 }
 
-.booking-page-close-btn:hover {
-  color: rgb(4, 2, 2);
+.bliss-modal-close:hover {
+  color: #2c3e50;
 }
 
-.booking-page-modal-title {
-  font-size: 1.5em;
-  margin-bottom: 20px;
+.bliss-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px;
 }
 
-.booking-page-guest-details-title,
-.booking-page-special-request-title {
-  font-size: 1.2em;
-  margin-top: 20px;
+.bliss-modal-section {
+  margin-bottom: 15px;
 }
 
-.booking-page-guest-info {
-  margin-left: 20px;
-  font-style: italic;
+.bliss-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.booking-page-refund-select {
+.bliss-section-icon {
+  color: #3498db;
+}
+
+.bliss-info-row {
+  display: flex;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.bliss-info-label {
+  font-weight: 500;
+  color: #7f8c8d;
+  min-width: 100px;
+}
+
+.bliss-info-value {
+  flex: 1;
+}
+
+.bliss-inline-icon {
+  margin-right: 5px;
+  color: #7f8c8d;
+}
+
+.bliss-guest-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.bliss-guest-item {
+  background: #f5f7fa;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.bliss-guest-name {
+  font-weight: 500;
+  margin-right: 8px;
+}
+
+.bliss-guest-age {
+  color: #7f8c8d;
+}
+
+.bliss-special-request {
+  background: #f5f7fa;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Refund Section */
+.bliss-refund-section {
+  grid-column: 1 / -1;
+}
+
+.bliss-refund-controls {
+  display: flex;
+  gap: 10px;
   margin-top: 10px;
-  padding: 8px;
-  width: 100%;
-  font-size: 1rem;
-  border-radius: 5px;
-  border: 1px solid #ddd;
 }
 
-.booking-page-update-btn {
-  margin-top: 20px;
-  padding: 10px 20px;
-  background-color: #28a745;
+.bliss-refund-input {
+  flex: 1;
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.bliss-refund-input:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.bliss-update-btn {
+  background: #3498db;
   color: white;
   border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
   cursor: pointer;
-  border-radius: 5px;
+  transition: all 0.2s;
 }
 
-.booking-page-update-btn:hover {
-  background-color: #218838;
+.bliss-update-btn:hover {
+  background: #2980b9;
 }
 
-.booking-page-modal p {
-  margin-bottom: 10px;
-  font-size: 1.1rem;
+.bliss-update-btn:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
 }
 
-.booking-page-addons {
-  margin-top: 20px;
-}
-
-.booking-page-addon-item {
-  margin-left: 20px;
-  font-size: 1.1rem;
-  list-style-type: none;
-}
-
-.booking-page-addon-item span {
-  font-weight: bold;
-  color: #007BFF;
-}
-
+/* Responsive Adjustments */
 @media (max-width: 768px) {
-  .booking-page-table th,
-  .booking-page-table td {
-    padding: 8px;
+  .bliss-booking-header {
+    flex-direction: column;
   }
-
-  .booking-page-search-input {
-    width: 90%;
+  
+  .bliss-booking-title {
+    font-size: 24px;
   }
-
-  .booking-page-modal {
-    width: 95%;
-    padding: 15px;
+  
+  .bliss-booking-table th, 
+  .bliss-booking-row td {
+    padding: 10px;
+    font-size: 14px;
   }
-
-  .booking-page-update-btn {
-    padding: 8px 16px;
+  
+  .bliss-modal-grid {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 480px) {
-  .booking-page-search-input {
+  .bliss-booking-container {
+    padding: 15px;
+  }
+  
+  .bliss-view-btn {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+  
+  .bliss-refund-controls {
+    flex-direction: column;
+  }
+  
+  .bliss-update-btn {
     width: 100%;
   }
-
-  .booking-page-table {
-    font-size: 0.9rem;
-  }
-
-  .booking-page-modal {
-    width: 95%;
-  }
-
-  .booking-page-modal-title {
-    font-size: 1.3em;
-  }
-}
-.booked {
-  background-color: red !important;
-  color: white !important;
 }

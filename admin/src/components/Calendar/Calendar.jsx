@@ -18,6 +18,8 @@ const Calendar = () => {
   const [showBookingDetails, setShowBookingDetails] = useState(null);
   const [error, setError] = useState('');
   const [cancelling, setCancelling] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [tempSelectedDate, setTempSelectedDate] = useState(new Date());
 
   const formatDate = (date) => date.toISOString().split('T')[0];
 
@@ -98,7 +100,7 @@ const Calendar = () => {
             name: order.name,
             mobileNumber: order.mobileNumber,
             bookingDate: order.bookingDate || null,
-            productDetails: order.productDetails || null // Add productDetails to access venue/timeSlot
+            productDetails: order.productDetails || null
           });
         }
       });
@@ -144,7 +146,6 @@ const Calendar = () => {
       const dateKey = formatDate(currentDate);
       const maxRooms = venueConfig[venueForBooking]?.totalRooms || 0;
       
-      // Check for existing booking
       const alreadyBooked = await checkExistingBooking(
         userPhone,
         dateKey,
@@ -178,10 +179,8 @@ const Calendar = () => {
         status: 'success'
       };
 
-      // Add the booking to orders collection
       await addDoc(collection(fireDB, 'orders'), bookingData);
       
-      // Update the venue's booked rooms count
       const venueRef = doc(fireDB, 'venues', venueForBooking);
       const venueDoc = await getDoc(venueRef);
       
@@ -201,10 +200,8 @@ const Calendar = () => {
         });
       }
       
-      // Refresh the data
       await fetchBookedRooms();
       
-      // Reset form
       setSelectedSlot(null);
       setVenueForBooking('');
       setTimeSlotForBooking('');
@@ -223,19 +220,12 @@ const Calendar = () => {
       setCancelling(true);
       setError('');
 
-      // Debug: Log the booking object
-      console.log('Cancelling booking:', booking);
-
       if (!booking) {
         throw new Error('No booking selected for cancellation');
       }
 
-      // Get venue and timeSlot from productDetails
       const venue = booking.productDetails?.venue;
       const timeSlot = booking.productDetails?.timeSlot;
-
-      // Debug: Log venue and timeSlot
-      console.log('Cancellation details - Venue:', venue, 'Time Slot:', timeSlot);
 
       if (!venue || !timeSlot) {
         throw new Error('Could not determine venue and time slot from booking');
@@ -258,11 +248,7 @@ const Calendar = () => {
 
       const dateKey = formatDate(currentDate);
       
-      // Debug: Log the document update
-      console.log('Updating document with ID:', booking.id);
-      
       if (isManual) {
-        // For manual bookings, update the document to remove booking details
         await updateDoc(doc(fireDB, 'orders', booking.id), {
           'productDetails.checkInDate': null,
           'productDetails.venue': null,
@@ -271,11 +257,9 @@ const Calendar = () => {
           status: 'cancelled'
         });
       } else {
-        // For online bookings, delete the document
         await deleteDoc(doc(fireDB, 'orders', booking.id));
       }
 
-      // Update the venue's booked rooms count
       const venueRef = doc(fireDB, 'venues', venue);
       const venueDoc = await getDoc(venueRef);
       
@@ -284,9 +268,8 @@ const Calendar = () => {
         const dateBookings = currentBookedRooms[dateKey] || {};
         const slotBookings = dateBookings[timeSlot] || 0;
         
-        // Only update if there are actually bookings to decrement
         if (slotBookings > 0) {
-          const updateData = {
+          await updateDoc(venueRef, {
             bookedRooms: {
               ...currentBookedRooms,
               [dateKey]: {
@@ -294,16 +277,10 @@ const Calendar = () => {
                 [timeSlot]: slotBookings - 1
               }
             }
-          };
-
-          // Debug: Log the update data
-          console.log('Updating venue with:', updateData);
-          
-          await updateDoc(venueRef, updateData);
+          });
         }
       }
 
-      // Refresh the data
       await fetchBookedRooms();
       
       alert('Booking cancelled successfully.');
@@ -326,6 +303,95 @@ const Calendar = () => {
     const newDate = new Date(currentDate);
     newDate.setDate(currentDate.getDate() + 1);
     setCurrentDate(newDate);
+  };
+
+  const handleDateSelect = (date) => {
+    setCurrentDate(date);
+    setShowDatePicker(false);
+  };
+
+  const renderDatePicker = () => {
+    const daysInMonth = new Date(
+      tempSelectedDate.getFullYear(),
+      tempSelectedDate.getMonth() + 1,
+      0
+    ).getDate();
+    
+    const firstDayOfMonth = new Date(
+      tempSelectedDate.getFullYear(),
+      tempSelectedDate.getMonth(),
+      1
+    ).getDay();
+    
+    const days = [];
+    
+    // Add empty cells for days before the first of the month
+    for (let i = 0; i < firstDayOfMonth; i++) {
+      days.push(<div key={`empty-${i}`} className="luxury-date-picker-empty-cell"></div>);
+    }
+    
+    // Add cells for each day of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(
+        tempSelectedDate.getFullYear(),
+        tempSelectedDate.getMonth(),
+        day
+      );
+      
+      const isCurrentDate = date.toDateString() === currentDate.toDateString();
+      const hasBookings = bookedRooms[formatDate(date)] !== undefined;
+      
+      days.push(
+        <div
+          key={`day-${day}`}
+          className={`luxury-date-picker-day 
+            ${isCurrentDate ? 'luxury-date-picker-day-selected' : ''}
+            ${hasBookings ? 'luxury-date-picker-day-has-bookings' : ''}`}
+          onClick={() => handleDateSelect(date)}
+        >
+          {day}
+          {hasBookings && <div className="luxury-date-picker-booking-dot"></div>}
+        </div>
+      );
+    }
+    
+    return (
+      <div className="luxury-date-picker-container">
+        <div className="luxury-date-picker-header">
+          <button
+            className="luxury-date-picker-nav"
+            onClick={() => {
+              const newDate = new Date(tempSelectedDate);
+              newDate.setMonth(newDate.getMonth() - 1);
+              setTempSelectedDate(newDate);
+            }}
+          >
+            &lt;
+          </button>
+          <div className="luxury-date-picker-month">
+            {tempSelectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+          </div>
+          <button
+            className="luxury-date-picker-nav"
+            onClick={() => {
+              const newDate = new Date(tempSelectedDate);
+              newDate.setMonth(newDate.getMonth() + 1);
+              setTempSelectedDate(newDate);
+            }}
+          >
+            &gt;
+          </button>
+        </div>
+        <div className="luxury-date-picker-weekdays">
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+            <div key={day} className="luxury-date-picker-weekday">{day}</div>
+          ))}
+        </div>
+        <div className="luxury-date-picker-grid">
+          {days}
+        </div>
+      </div>
+    );
   };
 
   const formattedDate = formatDate(currentDate);
@@ -356,10 +422,25 @@ const Calendar = () => {
           <button className="luxury-nav-button" onClick={handlePreviousDay}>
             <FiChevronLeft size={24} />
           </button>
-          <h2 className="luxury-current-date">
-            <FiCalendar className="luxury-date-icon" />
-            {currentDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-          </h2>
+          
+          <div className="luxury-date-display-container">
+            <h2 
+              className="luxury-current-date"
+              onClick={() => {
+                setTempSelectedDate(currentDate);
+                setShowDatePicker(!showDatePicker);
+              }}
+            >
+              <FiCalendar className="luxury-date-icon" />
+              {currentDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            </h2>
+            {showDatePicker && (
+              <div className="luxury-date-picker-popup">
+                {renderDatePicker()}
+              </div>
+            )}
+          </div>
+          
           <button className="luxury-nav-button" onClick={handleNextDay}>
             <FiChevronRight size={24} />
           </button>
@@ -368,19 +449,39 @@ const Calendar = () => {
         <div className="luxury-venue-selection">
           <h3 className="luxury-section-title">Select Package</h3>
           <div className="luxury-venue-grid">
-            {availableVenues.map((venue) => (
-              <div
-                key={venue}
-                className={`luxury-venue-card ${venueForBooking === venue ? 'luxury-venue-card-active' : ''}`}
-                onClick={() => {
-                  setVenueForBooking(venue);
-                  setTimeSlotForBooking('');
-                }}
-              >
-                <h4>{venue}</h4>
-                <p>{venueConfig[venue]?.totalRooms || 0} rooms available</p>
-              </div>
-            ))}
+            {availableVenues.map((venue) => {
+              const venueBookings = bookingsForDate[venue] || {};
+              const totalSlots = venueConfig[venue]?.timeSlots?.length || 0;
+              const bookedSlots = Object.keys(venueBookings).length;
+              const availabilityPercentage = totalSlots > 0 
+              ? Math.round(((totalSlots - bookedSlots) / totalSlots) * 100)
+              : 0;
+         
+              
+              return (
+                <div
+                  key={venue}
+                  className={`luxury-venue-card ${venueForBooking === venue ? 'luxury-venue-card-active' : ''}`}
+                  onClick={() => {
+                    setVenueForBooking(venue);
+                    setTimeSlotForBooking('');
+                  }}
+                >
+                  <h4>{venue}</h4>
+                  <div className="luxury-venue-availability">
+                    <div className="luxury-availability-bar">
+                      <div 
+                        className="luxury-availability-fill"
+                        style={{ width: `${availabilityPercentage}%` }}
+                      ></div>
+                    </div>
+                    <span className="luxury-availability-text">
+                      {venueConfig[venue]?.totalRooms || 0} rooms available
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -403,8 +504,12 @@ const Calendar = () => {
               {venueConfig[venueForBooking].timeSlots.map((slot, slotIndex) => {
                 const bookings = bookingsForDate[venueForBooking]?.[slot] || {};
                 const bookedCount = bookings.count || 0;
-                const isFullyBooked = bookedCount >= (venueConfig[venueForBooking]?.totalRooms || 0);
+                const totalRooms = venueConfig[venueForBooking]?.totalRooms || 0;
+                const isFullyBooked = bookedCount >= totalRooms;
                 const bookingList = bookings.bookings || [];
+                const availabilityPercentage = totalRooms > 0 
+                  ? Math.round(((totalRooms - bookedCount) / totalRooms) * 100)
+                  : 0;
 
                 return (
                   <div
@@ -424,9 +529,17 @@ const Calendar = () => {
                         {isFullyBooked ? (
                           <span className="luxury-slot-badge luxury-slot-badge-full">FULL</span>
                         ) : bookedCount > 0 ? (
-                          <span className="luxury-slot-badge luxury-slot-badge-partial">
-                            {bookedCount}/{venueConfig[venueForBooking]?.totalRooms || 0}
-                          </span>
+                          <div className="luxury-slot-availability">
+                            <div className="luxury-slot-availability-bar">
+                              <div 
+                                className="luxury-slot-availability-fill"
+                                style={{ width: `${availabilityPercentage}%` }}
+                              ></div>
+                            </div>
+                            <span className="luxury-slot-count">
+                              {bookedCount}/{totalRooms}
+                            </span>
+                          </div>
                         ) : (
                           <span className="luxury-slot-badge luxury-slot-badge-available">AVAILABLE</span>
                         )}
@@ -443,7 +556,7 @@ const Calendar = () => {
                                 setShowBookingDetails(booking);
                               }}
                             >
-                              <span>{booking.name}</span>
+                              <span className="luxury-booking-name">{booking.name}</span>
                               <FiInfo className="luxury-booking-info-icon" />
                             </div>
                           ))}
@@ -468,8 +581,10 @@ const Calendar = () => {
               <FiCalendar className="luxury-form-icon" />
               Book Slot
             </h3>
-            <p className="luxury-booking-slot">{selectedSlot}</p>
-            <p className="luxury-booking-date">{formattedDate}</p>
+            <div className="luxury-booking-slot-info">
+              <div className="luxury-booking-slot">{selectedSlot}</div>
+              <div className="luxury-booking-date">{formattedDate}</div>
+            </div>
             
             <div className="luxury-form-group">
               <label className="luxury-input-label">
@@ -504,16 +619,27 @@ const Calendar = () => {
             
             {error && <div className="luxury-form-error">{error}</div>}
             
-            <button className="luxury-confirm-button" onClick={bookSlot}>
-              Confirm Booking
-            </button>
+            <div className="luxury-form-actions">
+              <button 
+                className="luxury-confirm-button" 
+                onClick={bookSlot}
+              >
+                Confirm Booking
+              </button>
+              <button 
+                className="luxury-cancel-form-button"
+                onClick={() => setSelectedSlot(null)}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}
 
- {showBookingDetails && (
+      {showBookingDetails && (
         <div className="luxury-booking-details-modal">
-          <div className="luxury-booking-details">
+          <div className="luxury-booking-details-content">
             <button className="luxury-close-button" onClick={() => setShowBookingDetails(null)}>
               <FiX size={24} />
             </button>
