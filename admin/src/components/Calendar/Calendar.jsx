@@ -20,8 +20,14 @@ const Calendar = () => {
   const [cancelling, setCancelling] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [tempSelectedDate, setTempSelectedDate] = useState(new Date());
+  const [packageDetails, setPackageDetails] = useState(null);
 
-  const formatDate = (date) => date.toISOString().split('T')[0];
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,15 +35,11 @@ const Calendar = () => {
         setLoading(true);
         setError('');
         
+        // Fetch venues configuration
         const venuesSnapshot = await getDocs(collection(fireDB, 'venues'));
         const venuesData = {};
-        venuesSnapshot.forEach(doc => {
-          venuesData[doc.id] = {
-            totalRooms: doc.data().totalRooms,
-            timeSlots: []
-          };
-        });
         
+        // Fetch time slots configuration
         const [diningSlotsDoc, staySlotsDoc] = await Promise.all([
           getDoc(doc(fireDB, 'timeSlotsConfig', 'diningVenues')),
           getDoc(doc(fireDB, 'timeSlotsConfig', 'stayVenues'))
@@ -46,16 +48,34 @@ const Calendar = () => {
         const diningSlots = diningSlotsDoc.exists() ? diningSlotsDoc.data() : {};
         const staySlots = staySlotsDoc.exists() ? staySlotsDoc.data() : {};
         
-        Object.keys(venuesData).forEach(venueName => {
-          if (diningSlots[venueName]) {
-            venuesData[venueName].timeSlots = diningSlots[venueName];
+        // Process venues data
+        venuesSnapshot.forEach(doc => {
+          const venueName = doc.id;
+          const venueData = doc.data();
+          
+          // Determine time slots - prioritize venue-specific slots, fall back to config
+          let timeSlots = [];
+          let packageType = 'stayVenues'; // Default to stay venues
+          
+          if (venueData.timeSlots && venueData.timeSlots.length > 0) {
+            timeSlots = venueData.timeSlots;
+          } else if (diningSlots[venueName]) {
+            timeSlots = diningSlots[venueName];
+            packageType = 'diningVenues';
           } else if (staySlots[venueName]) {
-            venuesData[venueName].timeSlots = staySlots[venueName];
+            timeSlots = staySlots[venueName];
           }
+          
+          venuesData[venueName] = {
+            name: venueName,
+            totalRooms: venueData.totalRooms || 1,
+            timeSlots: timeSlots,
+            packageType: packageType
+          };
         });
         
         setVenueConfig(venuesData);
-        setAvailableVenues(Object.keys(venuesData).filter(venue => venuesData[venue].timeSlots.length > 0));
+        setAvailableVenues(Object.keys(venuesData));
         await fetchBookedRooms();
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -72,29 +92,31 @@ const Calendar = () => {
     try {
       const querySnapshot = await getDocs(collection(fireDB, 'orders'));
       const fetchedBookings = {};
-
+  
       querySnapshot.forEach((doc) => {
         const order = doc.data();
         const { checkInDate, venue, timeSlot } = order.productDetails || {};
-
+  
         if (checkInDate && venue && timeSlot) {
-          if (!fetchedBookings[checkInDate]) {
-            fetchedBookings[checkInDate] = {};
+          const formattedDate = checkInDate.split('T')[0];
+          
+          if (!fetchedBookings[formattedDate]) {
+            fetchedBookings[formattedDate] = {};
           }
-
-          if (!fetchedBookings[checkInDate][venue]) {
-            fetchedBookings[checkInDate][venue] = {};
+  
+          if (!fetchedBookings[formattedDate][venue]) {
+            fetchedBookings[formattedDate][venue] = {};
           }
-
-          if (!fetchedBookings[checkInDate][venue][timeSlot]) {
-            fetchedBookings[checkInDate][venue][timeSlot] = {
+  
+          if (!fetchedBookings[formattedDate][venue][timeSlot]) {
+            fetchedBookings[formattedDate][venue][timeSlot] = {
               count: 0,
               bookings: []
             };
           }
-
-          fetchedBookings[checkInDate][venue][timeSlot].count++;
-          fetchedBookings[checkInDate][venue][timeSlot].bookings.push({
+  
+          fetchedBookings[formattedDate][venue][timeSlot].count++;
+          fetchedBookings[formattedDate][venue][timeSlot].bookings.push({
             id: doc.id,
             isManual: order.isManual || false,
             name: order.name,
@@ -104,7 +126,7 @@ const Calendar = () => {
           });
         }
       });
-
+  
       setBookedRooms(fetchedBookings);
     } catch (error) {
       console.error('Error fetching booked rooms:', error);
@@ -181,7 +203,6 @@ const Calendar = () => {
           code: "PAYMENT_SUCCESS"
         }
       };
-      
 
       await addDoc(collection(fireDB, 'orders'), bookingData);
       
@@ -310,7 +331,9 @@ const Calendar = () => {
   };
 
   const handleDateSelect = (date) => {
-    setCurrentDate(date);
+    // Create a new date object without time components to avoid timezone issues
+    const selectedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    setCurrentDate(selectedDate);
     setShowDatePicker(false);
   };
 
@@ -398,8 +421,133 @@ const Calendar = () => {
     );
   };
 
-  const formattedDate = formatDate(currentDate);
-  const bookingsForDate = bookedRooms[formattedDate] || {};
+  const renderVenueCards = () => {
+    return availableVenues.map((venue) => {
+      const venueInfo = venueConfig[venue] || {};
+      const venueBookings = bookedRooms[formatDate(currentDate)]?.[venue] || {};
+      
+      // Calculate availability
+      const totalSlots = venueInfo.timeSlots?.length || 0;
+      const bookedSlots = Object.keys(venueBookings).length;
+      const availabilityPercentage = totalSlots > 0 
+        ? Math.round(((totalSlots - bookedSlots) / totalSlots) * 100)
+        : 0;
+      
+      return (
+        <div
+          key={venue}
+          className={`luxury-venue-card ${venueForBooking === venue ? 'luxury-venue-card-active' : ''}`}
+          onClick={() => {
+            setVenueForBooking(venue);
+            setTimeSlotForBooking('');
+          }}
+        >
+          <h4>{venue}</h4>
+          <div className="luxury-venue-meta">
+            <span className="luxury-venue-type">
+              {venueInfo.packageType === 'diningVenues' ? 'Dining' : 'Stay'} Package
+            </span>
+            <span className="luxury-venue-rooms">
+              {venueInfo.totalRooms} {venueInfo.totalRooms > 1 ? 'rooms' : 'room'} available
+            </span>
+          </div>
+          <div className="luxury-venue-availability">
+            <div className="luxury-availability-bar">
+              <div 
+                className="luxury-availability-fill"
+                style={{ width: `${availabilityPercentage}%` }}
+              ></div>
+            </div>
+            <span className="luxury-availability-text">
+              {totalSlots - bookedSlots} of {totalSlots} slots available
+            </span>
+          </div>
+        </div>
+      );
+    });
+  };
+
+  const renderTimeSlots = () => {
+    if (!venueForBooking || !venueConfig[venueForBooking]) return null;
+    
+    const venueInfo = venueConfig[venueForBooking];
+    const formattedDate = formatDate(currentDate);
+    const bookingsForVenue = bookedRooms[formattedDate]?.[venueForBooking] || {};
+    
+    return (
+      <div className="luxury-calendar-main">
+        <div className="luxury-time-slots-header">
+          <div className="luxury-venue-label">{venueForBooking}</div>
+          {venueInfo.timeSlots?.map((slot, index) => (
+            <div key={index} className="luxury-time-slot-header">
+              <FiClock className="luxury-time-icon" />
+              {slot}
+            </div>
+          ))}
+        </div>
+
+        <div className="luxury-availability-grid">
+          <div className="luxury-availability-row">
+            <div className="luxury-venue-label"></div>
+            {venueInfo.timeSlots?.map((slot, slotIndex) => {
+              const slotBookings = bookingsForVenue[slot] || {};
+              const bookedCount = slotBookings.count || 0;
+              const totalRooms = venueInfo.totalRooms || 1;
+              const isFullyBooked = bookedCount >= totalRooms;
+              const bookingList = slotBookings.bookings || [];
+              
+              return (
+                <div
+                  key={slotIndex}
+                  className={`luxury-time-slot ${isFullyBooked ? 'luxury-time-slot-booked' : ''} ${
+                    bookedCount > 0 ? 'luxury-time-slot-partial' : 'luxury-time-slot-available'
+                  }`}
+                  onClick={() => {
+                    if (!isFullyBooked) {
+                      setSelectedSlot(`${venueForBooking} - ${slot}`);
+                      setTimeSlotForBooking(slot);
+                    }
+                  }}
+                >
+                  <div className="luxury-slot-content">
+                    <div className="luxury-slot-status">
+                      {isFullyBooked ? (
+                        <span className="luxury-slot-badge luxury-slot-badge-full">FULL</span>
+                      ) : bookedCount > 0 ? (
+                        <div className="luxury-slot-count">
+                          {bookedCount}/{totalRooms} booked
+                        </div>
+                      ) : (
+                        <span className="luxury-slot-badge luxury-slot-badge-available">AVAILABLE</span>
+                      )}
+                    </div>
+
+                    {bookingList.length > 0 && (
+                      <div className="luxury-booking-list">
+                        {bookingList.map((booking, i) => (
+                          <div
+                            key={i}
+                            className={`luxury-booking-item ${booking.isManual ? 'luxury-booking-manual' : 'luxury-booking-online'}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowBookingDetails(booking);
+                            }}
+                          >
+                            <span className="luxury-booking-name">{booking.name}</span>
+                            <FiInfo className="luxury-booking-info-icon" />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   if (loading) {
     return (
@@ -453,127 +601,12 @@ const Calendar = () => {
         <div className="luxury-venue-selection">
           <h3 className="luxury-section-title">Select Package</h3>
           <div className="luxury-venue-grid">
-            {availableVenues.map((venue) => {
-              const venueBookings = bookingsForDate[venue] || {};
-              const totalSlots = venueConfig[venue]?.timeSlots?.length || 0;
-              const bookedSlots = Object.keys(venueBookings).length;
-              const availabilityPercentage = totalSlots > 0 
-              ? Math.round(((totalSlots - bookedSlots) / totalSlots) * 100)
-              : 0;
-         
-              
-              return (
-                <div
-                  key={venue}
-                  className={`luxury-venue-card ${venueForBooking === venue ? 'luxury-venue-card-active' : ''}`}
-                  onClick={() => {
-                    setVenueForBooking(venue);
-                    setTimeSlotForBooking('');
-                  }}
-                >
-                  <h4>{venue}</h4>
-                  <div className="luxury-venue-availability">
-                    <div className="luxury-availability-bar">
-                      <div 
-                        className="luxury-availability-fill"
-                        style={{ width: `${availabilityPercentage}%` }}
-                      ></div>
-                    </div>
-                    <span className="luxury-availability-text">
-                      {venueConfig[venue]?.totalRooms || 0} rooms available
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+            {renderVenueCards()}
           </div>
         </div>
       </div>
 
-      {venueForBooking && venueConfig[venueForBooking]?.timeSlots?.length > 0 && (
-        <div className="luxury-calendar-main">
-          <div className="luxury-time-slots-header">
-            <div className="luxury-venue-label">{venueForBooking}</div>
-            {venueConfig[venueForBooking].timeSlots.map((slot, index) => (
-              <div key={index} className="luxury-time-slot-header">
-                <FiClock className="luxury-time-icon" />
-                {slot}
-              </div>
-            ))}
-          </div>
-
-          <div className="luxury-availability-grid">
-            <div className="luxury-availability-row">
-              <div className="luxury-venue-label"></div>
-              {venueConfig[venueForBooking].timeSlots.map((slot, slotIndex) => {
-                const bookings = bookingsForDate[venueForBooking]?.[slot] || {};
-                const bookedCount = bookings.count || 0;
-                const totalRooms = venueConfig[venueForBooking]?.totalRooms || 0;
-                const isFullyBooked = bookedCount >= totalRooms;
-                const bookingList = bookings.bookings || [];
-                const availabilityPercentage = totalRooms > 0 
-                  ? Math.round(((totalRooms - bookedCount) / totalRooms) * 100)
-                  : 0;
-
-                return (
-                  <div
-                    key={slotIndex}
-                    className={`luxury-time-slot ${isFullyBooked ? 'luxury-time-slot-booked' : ''} ${
-                      bookedCount > 0 ? 'luxury-time-slot-partial' : 'luxury-time-slot-available'
-                    }`}
-                    onClick={() => {
-                      if (!isFullyBooked) {
-                        setSelectedSlot(`${venueForBooking} - ${slot}`);
-                        setTimeSlotForBooking(slot);
-                      }
-                    }}
-                  >
-                    <div className="luxury-slot-content">
-                      <div className="luxury-slot-status">
-                        {isFullyBooked ? (
-                          <span className="luxury-slot-badge luxury-slot-badge-full">FULL</span>
-                        ) : bookedCount > 0 ? (
-                          <div className="luxury-slot-availability">
-                            <div className="luxury-slot-availability-bar">
-                              <div 
-                                className="luxury-slot-availability-fill"
-                                style={{ width: `${availabilityPercentage}%` }}
-                              ></div>
-                            </div>
-                            <span className="luxury-slot-count">
-                              {bookedCount}/{totalRooms}
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="luxury-slot-badge luxury-slot-badge-available">AVAILABLE</span>
-                        )}
-                      </div>
-
-                      {bookingList.length > 0 && (
-                        <div className="luxury-booking-list">
-                          {bookingList.map((booking, i) => (
-                            <div
-                              key={i}
-                              className={`luxury-booking-item ${booking.isManual ? 'luxury-booking-manual' : 'luxury-booking-online'}`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setShowBookingDetails(booking);
-                              }}
-                            >
-                              <span className="luxury-booking-name">{booking.name}</span>
-                              <FiInfo className="luxury-booking-info-icon" />
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
+      {renderTimeSlots()}
 
       {selectedSlot && (
         <div className="luxury-booking-modal">
@@ -587,7 +620,7 @@ const Calendar = () => {
             </h3>
             <div className="luxury-booking-slot-info">
               <div className="luxury-booking-slot">{selectedSlot}</div>
-              <div className="luxury-booking-date">{formattedDate}</div>
+              <div className="luxury-booking-date">{formatDate(currentDate)}</div>
             </div>
             
             <div className="luxury-form-group">
