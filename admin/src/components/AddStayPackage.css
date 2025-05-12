@@ -672,3 +672,22 @@
     font-size: 1.6rem;
   }
 }
+.sp-delete-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.sp-delete-option label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #666;
+  cursor: pointer;
+}
+
+.sp-delete-option input[type="checkbox"] {
+  margin: 0;
+}

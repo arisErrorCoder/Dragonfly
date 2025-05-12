@@ -1,4 +1,4 @@
-/* Base styles */
+/* Base Styles */
 .vms-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -6,35 +6,127 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.vms-loading {
-  text-align: center;
-  padding: 40px;
-  font-size: 18px;
-  color: #666;
-}
-
 .vms-title {
   text-align: center;
-  margin-bottom: 30px;
   color: #2c3e50;
+  margin-bottom: 30px;
 }
 
-/* Tabs styling */
+.vms-loading {
+  text-align: center;
+  padding: 50px;
+  font-size: 18px;
+  color: #7f8c8d;
+}
+
+/* Global Toggle Styles */
+.vms-global-toggle {
+  margin-bottom: 25px;
+  padding: 15px 20px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 1px solid #e0e0e0;
+}
+
+.vms-toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.vms-global-icon {
+  font-size: 20px;
+  color: #bdc3c7;
+}
+
+.vms-global-icon.active {
+  color: #2ecc71;
+}
+
+.vms-global-toggle label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: #34495e;
+  cursor: pointer;
+}
+
+.vms-toggle {
+  position: relative;
+  width: 70px;
+  height: 32px;
+  background: #e74c3c;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: background 0.3s;
+  display: flex;
+  align-items: center;
+  padding: 0 5px;
+}
+
+.vms-toggle.on {
+  background: #2ecc71;
+}
+
+.vms-toggle.off {
+  background: #e74c3c;
+}
+
+.vms-toggle-knob {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.3s;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.vms-toggle.on .vms-toggle-knob {
+  transform: translateX(38px);
+}
+
+.vms-toggle.off .vms-toggle-knob {
+  transform: translateX(2px);
+}
+
+.vms-toggle span {
+  font-size: 11px;
+  color: white;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  font-weight: bold;
+  pointer-events: none;
+}
+
+.vms-global-note {
+  font-size: 14px;
+  color: #7f8c8d;
+  padding-left: 35px;
+}
+
+/* Tab Styles */
 .vms-tabs {
   display: flex;
-  margin-bottom: 30px;
+  margin-bottom: 25px;
   border-bottom: 1px solid #ddd;
 }
 
 .vms-tab-btn {
-  padding: 10px 20px;
+  padding: 12px 20px;
   background: none;
   border: none;
   border-bottom: 3px solid transparent;
   font-size: 16px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  color: #666;
+  color: #7f8c8d;
+  transition: all 0.3s;
 }
 
 .vms-tab-btn.active {
@@ -44,21 +136,27 @@
 }
 
 .vms-tab-btn:hover:not(.active) {
-  color: #2980b9;
+  color: #34495e;
 }
 
 /* Venue Management Styles */
 .vms-subtitle {
-  color: #34495e;
-  margin-bottom: 20px;
-  font-size: 20px;
+  color: #2c3e50;
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.vms-add-venue {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
 }
 
 .vms-add-form {
   display: flex;
   gap: 10px;
-  margin-bottom: 30px;
-  flex-wrap: wrap;
+  align-items: center;
 }
 
 .vms-input {
@@ -68,146 +166,208 @@
   font-size: 14px;
 }
 
-.vms-name-input {
+.vms-venue-select {
   flex: 2;
   min-width: 200px;
 }
 
 .vms-rooms-input {
   flex: 1;
-  min-width: 100px;
+  max-width: 100px;
 }
 
 .vms-add-button {
   padding: 10px 20px;
-  background-color: #2ecc71;
+  background: #3498db;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background 0.3s;
 }
 
 .vms-add-button:hover {
-  background-color: #27ae60;
+  background: #2980b9;
+}
+
+.vms-add-button:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
+/* Venues List Styles */
+.vms-venues-list {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
 .vms-table-header {
-  display: flex;
-  padding: 12px 15px;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-  margin-bottom: 10px;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  padding: 15px 20px;
+  background: #f1f3f4;
   font-weight: 600;
   color: #34495e;
-}
-
-.vms-header-name {
-  flex: 2;
-}
-
-.vms-header-rooms {
-  flex: 1;
-}
-
-.vms-header-actions {
-  flex: 1;
-  text-align: right;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .vms-venue-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  padding: 15px 20px;
   align-items: center;
-  padding: 15px;
-  margin-bottom: 10px;
-  background-color: white;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  border-bottom: 1px solid #f0f0f0;
+  transition: background 0.2s;
+}
+
+.vms-venue-item:hover {
+  background: #f9f9f9;
+}
+
+.vms-venue-item.disabled {
+  background: #fef0f0;
 }
 
 .vms-venue-name {
-  flex: 2;
   font-weight: 500;
 }
 
 .vms-venue-rooms {
-  flex: 1;
+  text-align: center;
 }
 
-.vms-venue-actions {
-  flex: 1;
-  text-align: right;
+.vms-venue-status, .vms-edit-status {
+  display: flex;
+  justify-content: center;
+}
+
+.vms-venue-toggle {
+  position: relative;
+  width: 60px;
+  height: 28px;
+  background: #e74c3c;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 0.3s;
+  display: flex;
+  align-items: center;
+  padding: 0 5px;
+}
+
+.vms-venue-toggle.on {
+  background: #2ecc71;
+}
+
+.vms-venue-toggle.off {
+  background: #e74c3c;
+}
+
+.vms-venue-toggle-knob {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.3s;
+  box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+}
+
+.vms-venue-toggle.on .vms-venue-toggle-knob {
+  transform: translateX(32px);
+}
+
+.vms-venue-toggle.off .vms-venue-toggle-knob {
+  transform: translateX(2px);
+}
+
+.vms-venue-toggle span {
+  font-size: 10px;
+  color: white;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  font-weight: bold;
+  pointer-events: none;
+}
+
+.vms-venue-actions, .vms-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 .vms-edit-button, .vms-save-button, .vms-cancel-button {
-  padding: 6px 12px;
-  margin-left: 8px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
   font-size: 14px;
+  transition: all 0.2s;
 }
 
 .vms-edit-button {
-  background-color: #3498db;
+  background: #f39c12;
   color: white;
 }
 
 .vms-edit-button:hover {
-  background-color: #2980b9;
+  background: #e67e22;
 }
 
 .vms-save-button {
-  background-color: #2ecc71;
+  background: #2ecc71;
   color: white;
 }
 
 .vms-save-button:hover {
-  background-color: #27ae60;
+  background: #27ae60;
 }
 
 .vms-cancel-button {
-  background-color: #e74c3c;
+  background: #e74c3c;
   color: white;
 }
 
 .vms-cancel-button:hover {
-  background-color: #c0392b;
+  background: #c0392b;
 }
 
+.vms-no-venues {
+  padding: 30px;
+  text-align: center;
+  color: #7f8c8d;
+}
+
+/* Edit Form Styles */
 .vms-edit-input {
   padding: 8px 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
+  width: 100%;
 }
 
 .vms-edit-name {
-  flex: 2;
+  margin-right: 10px;
 }
 
 .vms-edit-rooms {
-  flex: 1;
-}
-
-.vms-edit-actions {
-  flex: 1;
-  text-align: right;
-}
-
-.vms-no-venues {
+  max-width: 80px;
   text-align: center;
-  padding: 30px;
-  color: #7f8c8d;
-  font-style: italic;
 }
 
 /* Time Slots Management Styles */
 .vms-time-slots-management {
   padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
 .vms-package-type-selector {
@@ -218,80 +378,71 @@
 
 .vms-type-btn {
   padding: 10px 20px;
-  background-color: #f8f9fa;
-  border: 1px solid #ddd;
+  background: #ecf0f1;
+  border: none;
   border-radius: 4px;
   cursor: pointer;
+  color: #7f8c8d;
   transition: all 0.3s;
 }
 
 .vms-type-btn.active {
-  background-color: #3498db;
+  background: #3498db;
   color: white;
-  border-color: #3498db;
 }
 
 .vms-type-btn:hover:not(.active) {
-  background-color: #e9ecef;
+  background: #dfe6e9;
 }
 
 .vms-venue-selection {
-  margin-bottom: 25px;
+  margin-bottom: 20px;
 }
 
 .vms-venue-selection label {
-  display: block;
-  margin-bottom: 8px;
+  margin-right: 10px;
   font-weight: 500;
-  color: #34495e;
 }
 
 .vms-venue-selection select {
-  width: 100%;
-  max-width: 400px;
-  padding: 10px;
+  padding: 8px 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 14px;
+  min-width: 200px;
 }
 
 .vms-time-slots-editor {
-  background-color: white;
-  padding: 25px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  margin-top: 20px;
 }
 
 .vms-slots-list {
-  margin: 20px 0;
-  min-height: 100px;
-  border: 1px dashed #eee;
-  padding: 15px;
-  border-radius: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  min-height: 50px;
 }
 
 .vms-slot-item {
+  padding: 8px 15px;
+  background: #e8f4fc;
+  border-radius: 20px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 10px;
-  margin-bottom: 8px;
-  background-color: #f8f9fa;
-  border-radius: 4px;
+  gap: 8px;
 }
 
 .vms-remove-btn {
   background: none;
   border: none;
   color: #e74c3c;
-  font-size: 18px;
   cursor: pointer;
-  padding: 0 5px;
+  font-size: 16px;
+  padding: 0;
+  line-height: 1;
 }
 
 .vms-no-slots {
-  text-align: center;
-  padding: 20px;
   color: #7f8c8d;
   font-style: italic;
 }
@@ -304,83 +455,64 @@
 
 .vms-add-slot input {
   flex: 1;
-  padding: 10px;
+  padding: 10px 15px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 14px;
 }
 
 .vms-add-btn {
   padding: 10px 20px;
-  background-color: #3498db;
+  background: #3498db;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s;
 }
 
-.vms-add-btn:hover:not(:disabled) {
-  background-color: #2980b9;
+.vms-add-btn:hover {
+  background: #2980b9;
 }
 
 .vms-add-btn:disabled {
-  background-color: #bdc3c7;
+  background: #bdc3c7;
   cursor: not-allowed;
 }
 
 .vms-save-btn {
-  padding: 12px 25px;
-  background-color: #2ecc71;
+  padding: 10px 25px;
+  background: #2ecc71;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-size: 16px;
-  transition: background-color 0.3s;
 }
 
-.vms-save-btn:hover:not(:disabled) {
-  background-color: #27ae60;
+.vms-save-btn:hover {
+  background: #27ae60;
 }
 
 .vms-save-btn:disabled {
-  background-color: #bdc3c7;
+  background: #bdc3c7;
   cursor: not-allowed;
 }
+.vms-delete-button {
+  background: #ff4444;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
 
-/* Responsive styles */
-@media (max-width: 768px) {
-  .vms-add-form {
-    flex-direction: column;
-  }
-  
-  .vms-input {
-    width: 100%;
-  }
-  
-  .vms-venue-item, .vms-table-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  
-  .vms-header-actions, .vms-venue-actions {
-    text-align: left;
-    width: 100%;
-  }
-  
-  .vms-edit-actions {
-    display: flex;
-    gap: 10px;
-    width: 100%;
-  }
-  
-  .vms-package-type-selector {
-    flex-direction: column;
-  }
-  
-  .vms-add-slot {
-    flex-direction: column;
-  }
+.vms-delete-button:hover {
+  background: #cc0000;
+}
+
+.vms-edit-actions .vms-delete-button {
+  margin-left: auto;
 }

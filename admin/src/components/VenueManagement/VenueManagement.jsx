@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { doc, updateDoc, getDoc, collection, getDocs, setDoc } from 'firebase/firestore';
+import { doc, updateDoc, getDoc, collection, getDocs, setDoc, deleteDoc } from 'firebase/firestore';
 import { fireDB } from '../firebase';
-import { FaEdit, FaSave, FaTimes } from 'react-icons/fa';
+import { FaEdit, FaSave, FaTimes, FaPowerOff, FaTrash } from 'react-icons/fa';
 import "./VenueManagement.css";
 
 const VenueManagementSystem = () => {
@@ -15,6 +15,7 @@ const VenueManagementSystem = () => {
   const [editForm, setEditForm] = useState({ name: '', totalRooms: 5 });
   const [newVenue, setNewVenue] = useState({ name: '', totalRooms: 5 });
   const [availableVenues, setAvailableVenues] = useState([]);
+  const [globalAvailability, setGlobalAvailability] = useState(true);
 
   // Time slots management state
   const [packageType, setPackageType] = useState('dining');
@@ -32,9 +33,19 @@ const VenueManagementSystem = () => {
         const venuesSnapshot = await getDocs(collection(fireDB, 'venues'));
         const venuesList = venuesSnapshot.docs.map(doc => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
+          isAvailable: doc.data().isAvailable !== false // Default to true if not set
         }));
         setVenues(venuesList);
+
+        // Fetch global availability status
+        const configDoc = await getDoc(doc(fireDB, 'config', 'availability'));
+        if (configDoc.exists()) {
+          setGlobalAvailability(configDoc.data().globalAvailability !== false);
+        } else {
+          // Initialize if doesn't exist
+          await setDoc(doc(fireDB, 'config', 'availability'), { globalAvailability: true });
+        }
 
         // Fetch venues from packages
         const diningSnapshot = await getDocs(collection(fireDB, 'Diningpackages'));
@@ -72,12 +83,13 @@ const VenueManagementSystem = () => {
     fetchAllVenues();
   }, []);
 
-  // Load time slots when venue or package type changes
   useEffect(() => {
     if (!selectedVenue) {
       setTimeSlots([]);
       return;
     }
+
+
 
     const fetchTimeSlots = async () => {
       try {
@@ -96,6 +108,53 @@ const VenueManagementSystem = () => {
 
     fetchTimeSlots();
   }, [selectedVenue, packageType]);
+
+  // Toggle global availability
+  const toggleGlobalAvailability = async () => {
+    try {
+      const newStatus = !globalAvailability;
+      await setDoc(doc(fireDB, 'config', 'availability'), {
+        globalAvailability: newStatus
+      }, { merge: true });
+      
+      setGlobalAvailability(newStatus);
+      
+      // Update all venues to match global status
+      const batchUpdates = venues.map(venue => 
+        updateDoc(doc(fireDB, 'venues', venue.id), {
+          isAvailable: newStatus
+        })
+      );
+      
+      await Promise.all(batchUpdates);
+      
+      // Update local state
+      setVenues(venues.map(venue => ({
+        ...venue,
+        isAvailable: newStatus
+      })));
+      
+    } catch (error) {
+      console.error('Error updating global availability:', error);
+    }
+  };
+
+  // Toggle individual venue availability
+  const toggleVenueAvailability = async (venueId, currentStatus) => {
+    try {
+      const newStatus = !currentStatus;
+      await updateDoc(doc(fireDB, 'venues', venueId), {
+        isAvailable: newStatus
+      });
+      
+      // Update local state
+      setVenues(venues.map(venue => 
+        venue.id === venueId ? { ...venue, isAvailable: newStatus } : venue
+      ));
+    } catch (error) {
+      console.error('Error updating venue availability:', error);
+    }
+  };
 
   // Venue management handlers
   const handleEditClick = (venue) => {
@@ -146,21 +205,26 @@ const VenueManagementSystem = () => {
         return;
       }
 
-      const newId = newVenue.name;
+const newId = newVenue.name.replace(/\s+/g, '-');
       const venueRef = doc(fireDB, 'venues', newId);
       await setDoc(venueRef, {
         name: newVenue.name,
         totalRooms: newVenue.totalRooms,
+        isAvailable: globalAvailability,
         bookedRooms: {}
       });
       
-      setVenues([...venues, { id: newId, ...newVenue }]);
+      setVenues([...venues, { 
+        id: newId, 
+        name: newVenue.name, 
+        totalRooms: newVenue.totalRooms,
+        isAvailable: globalAvailability
+      }]);
       setNewVenue({ name: '', totalRooms: 5 });
     } catch (error) {
       console.error('Error adding venue:', error);
     }
   };
-
 
   // Time slots handlers
   const handleAddSlot = () => {
@@ -198,11 +262,48 @@ const VenueManagementSystem = () => {
     }
   };
 
+    const deleteVenue = async (venueId) => {
+    if (!window.confirm('Are you sure you want to delete this venue? This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      await deleteDoc(doc(fireDB, 'venues', venueId));
+      setVenues(venues.filter(venue => venue.id !== venueId));
+      setEditingId(null); // Cancel editing if deleting the currently edited venue
+    } catch (error) {
+      console.error('Error deleting venue:', error);
+      alert('Failed to delete venue. Please try again.');
+    }
+  };
+
   if (loading) return <div className="vms-loading">Loading data...</div>;
 
   return (
     <div className="vms-container">
       <h1 className="vms-title">Venue Management System</h1>
+      
+      {/* Global Availability Toggle */}
+      <div className="vms-global-toggle">
+        <div className="vms-toggle-container">
+          <FaPowerOff className={`vms-global-icon ${globalAvailability ? 'active' : ''}`} />
+          <label>
+            Global Availability:
+            <div 
+              className={`vms-toggle ${globalAvailability ? 'on' : 'off'}`}
+              onClick={toggleGlobalAvailability}
+            >
+              <div className="vms-toggle-knob"></div>
+              <span>{globalAvailability ? 'ON' : 'OFF'}</span>
+            </div>
+          </label>
+        </div>
+        <div className="vms-global-note">
+          {globalAvailability ? 
+            'All venues are currently available for booking' : 
+            'All venues are currently paused - no bookings can be made'}
+        </div>
+      </div>
       
       <div className="vms-tabs">
         <button 
@@ -256,6 +357,7 @@ const VenueManagementSystem = () => {
             <div className="vms-table-header">
               <span className="vms-header-name">Venue Name</span>
               <span className="vms-header-rooms">Total Rooms</span>
+              <span className="vms-header-status">Status</span>
               <span className="vms-header-actions">Actions</span>
             </div>
             
@@ -263,54 +365,61 @@ const VenueManagementSystem = () => {
               <div className="vms-no-venues">No venues found</div>
             ) : (
               venues.map(venue => (
-                <div key={venue.id} className="vms-venue-item">
-                  {editingId === venue.id ? (
-                    <>
-                      <input
-                        type="text"
-                        className="vms-edit-input vms-edit-name"
-                        name="name"
-                        value={editForm.name}
-                        onChange={handleEditChange}
-                      />
-                      <input
-                        type="number"
-                        className="vms-edit-input vms-edit-rooms"
-                        name="totalRooms"
-                        min="1"
-                        value={editForm.totalRooms}
-                        onChange={handleEditChange}
-                      />
-                      <div className="vms-edit-actions">
-                        <button 
-                          className="vms-save-button"
-                          onClick={() => handleSaveVenue(venue.id)}
-                        >
-                          <FaSave /> Save
-                        </button>
-                        <button 
-                          className="vms-cancel-button"
-                          onClick={() => setEditingId(null)}
-                        >
-                          <FaTimes /> Cancel
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <span className="vms-venue-name">{venue.name}</span>
-                      <span className="vms-venue-rooms">{venue.totalRooms}</span>
-                      <div className="vms-venue-actions">
-                        <button 
-                          className="vms-edit-button"
-                          onClick={() => handleEditClick(venue)}
-                        >
-                          <FaEdit /> Edit
-                        </button>
-                      </div>
-                    </>
-                  )}
+        <div key={venue.id} className={`vms-venue-item ${venue.isAvailable ? '' : 'disabled'}`}>
+          {editingId === venue.id ? (
+            <>
+              {/* [Edit mode inputs remain the same...] */}
+              <div className="vms-edit-actions">
+                <button 
+                  className="vms-save-button"
+                  onClick={() => handleSaveVenue(venue.id)}
+                >
+                  <FaSave /> Save
+                </button>
+                <button 
+                  className="vms-cancel-button"
+                  onClick={() => setEditingId(null)}
+                >
+                  <FaTimes /> Cancel
+                </button>
+                <button 
+                  className="vms-delete-button"
+                  onClick={() => deleteVenue(venue.id)}
+                >
+                  <FaTrash /> Delete
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <span className="vms-venue-name">{venue.name}</span>
+              <span className="vms-venue-rooms">{venue.totalRooms}</span>
+              <div className="vms-venue-status">
+                <div 
+                  className={`vms-venue-toggle ${venue.isAvailable ? 'on' : 'off'}`}
+                  onClick={() => toggleVenueAvailability(venue.id, venue.isAvailable)}
+                >
+                  <div className="vms-venue-toggle-knob"></div>
+                  <span>{venue.isAvailable ? 'ON' : 'OFF'}</span>
                 </div>
+              </div>
+              <div className="vms-venue-actions">
+                <button 
+                  className="vms-edit-button"
+                  onClick={() => handleEditClick(venue)}
+                >
+                  <FaEdit /> Edit
+                </button>
+                <button 
+                  className="vms-delete-button"
+                  onClick={() => deleteVenue(venue.id)}
+                >
+                  <FaTrash />
+                </button>
+              </div>
+            </>
+          )}
+        </div>
               ))
             )}
           </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL,  deleteObject } from "firebase/storage";
 import { storage, fireDB } from './firebase';
-import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, setDoc, updateDoc, getDoc , deleteDoc, doc } from 'firebase/firestore';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './AddStayPackage.css';
@@ -17,6 +17,7 @@ const AddStayPackage = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [activeTab, setActiveTab] = useState('form');
   const [searchTerm, setSearchTerm] = useState('');
+  const [deleteAssociatedData, setDeleteAssociatedData] = useState(true);
 
   // Initial package state
   const initialPackageState = {
@@ -113,21 +114,73 @@ const AddStayPackage = () => {
     }
   };
 
-  const handleDeletePackage = async (id) => {
-    if (window.confirm('Are you sure you want to delete this package?')) {
-      setIsProcessing(true);
-      try {
-        await deleteDoc(doc(fireDB, 'stayPackages', id));
-        setPackages(packages.filter(pkg => pkg.id !== id));
-        toast.success('Package deleted successfully!');
-      } catch (error) {
-        console.error('Error deleting package:', error);
-        toast.error('Failed to delete package');
-      } finally {
-        setIsProcessing(false);
+const handleDeletePackage = async (id) => {
+  if (!window.confirm('Are you sure you want to delete this package and all its associated data?')) {
+    return;
+  }
+
+  setIsProcessing(true);
+  try {
+    const packageToDelete = packages.find(pkg => pkg.id === id);
+    if (!packageToDelete) {
+      toast.error('Package not found');
+      return;
+    }
+
+    // 1. First delete the package
+    await deleteDoc(doc(fireDB, 'stayPackages', id));
+
+    if (deleteAssociatedData && packageToDelete.venue) {
+      // 2. Delete associated venue (case-insensitive match)
+      const venuesSnapshot = await getDocs(collection(fireDB, 'venues'));
+      const venueToDelete = venuesSnapshot.docs.find(doc => 
+        doc.data().name.toLowerCase() === packageToDelete.venue.toLowerCase()
+      );
+      
+      if (venueToDelete) {
+        console.log(`Deleting venue: ${venueToDelete.data().name}`);
+        
+        // Delete all booked rooms subcollection if exists
+        const bookedRoomsRef = collection(fireDB, 'venues', venueToDelete.id, 'bookedRooms');
+        const bookedRoomsSnapshot = await getDocs(bookedRoomsRef);
+        const deleteBookedRooms = bookedRoomsSnapshot.docs.map(docRef =>
+          deleteDoc(doc(fireDB, 'venues', venueToDelete.id, 'bookedRooms', docRef.id))
+        );
+        await Promise.all(deleteBookedRooms);
+        
+        // Then delete the venue itself
+        await deleteDoc(doc(fireDB, 'venues', venueToDelete.id));
+      }
+      
+      // 3. Delete associated time slots configuration (case-insensitive)
+      const timeSlotsConfigRef = doc(fireDB, 'timeSlotsConfig', 'stayVenues');
+      const timeSlotsConfigSnap = await getDoc(timeSlotsConfigRef);
+      
+      if (timeSlotsConfigSnap.exists()) {
+        const configData = timeSlotsConfigSnap.data();
+        const venueKey = Object.keys(configData).find(key => 
+          key.toLowerCase() === packageToDelete.venue.toLowerCase()
+        );
+        
+        if (venueKey) {
+          console.log(`Deleting time slots for venue: ${venueKey}`);
+          const updatedConfig = { ...configData };
+          delete updatedConfig[venueKey];
+          await setDoc(timeSlotsConfigRef, updatedConfig);
+        }
       }
     }
-  };
+    
+    // Update local state
+    setPackages(packages.filter(pkg => pkg.id !== id));
+    toast.success('Package and all associated data deleted successfully!');
+  } catch (error) {
+    console.error('Error deleting package:', error);
+    toast.error('Failed to delete package. Please try again.');
+  } finally {
+    setIsProcessing(false);
+  }
+};
 
   const handleTogglePackageStatus = async (id, isActive) => {
     setIsProcessing(true);
@@ -510,28 +563,38 @@ const AddStayPackage = () => {
                       )}
                     </div>
                     
-                    <div className="sp-card-footer">
-                      <button 
-                        onClick={() => handleSetEditPackage(pkg)}
-                        className="sp-card-btn edit"
-                      >
-                        Edit
-                      </button>
-                      <button 
-                        onClick={() => handleTogglePackageStatus(pkg.id, pkg.isActive)}
-                        className={`sp-card-btn ${pkg.isActive ? 'deactivate' : 'activate'}`}
-                        disabled={isProcessing}
-                      >
-                        {pkg.isActive ? 'Deactivate' : 'Activate'}
-                      </button>
-                      <button 
-                        onClick={() => handleDeletePackage(pkg.id)}
-                        className="sp-card-btn delete"
-                        disabled={isProcessing}
-                      >
-                        Delete
-                      </button>
-                    </div>
+<div className="sp-card-footer">
+  <button 
+    onClick={() => handleSetEditPackage(pkg)}
+    className="sp-card-btn edit"
+  >
+    Edit
+  </button>
+  <button 
+    onClick={() => handleTogglePackageStatus(pkg.id, pkg.isActive)}
+    className={`sp-card-btn ${pkg.isActive ? 'deactivate' : 'activate'}`}
+    disabled={isProcessing}
+  >
+    {pkg.isActive ? 'Deactivate' : 'Activate'}
+  </button>
+  <div className="sp-delete-option">
+    <label>
+      <input
+        type="checkbox"
+        checked={deleteAssociatedData}
+        onChange={(e) => setDeleteAssociatedData(e.target.checked)}
+      />
+      Delete associated data
+    </label>
+    <button 
+      onClick={() => handleDeletePackage(pkg.id)}
+      className="sp-card-btn delete"
+      disabled={isProcessing}
+    >
+      Delete
+    </button>
+  </div>
+</div>
                   </div>
                 ))
               ) : (

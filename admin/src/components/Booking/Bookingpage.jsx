@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
-import { fireDB } from '../firebase';
+import { collection, getDocs, doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';import { fireDB } from '../firebase';
 import './Bookingpage.css';
 import { FiSearch, FiX, FiCalendar, FiUser, FiPhone, FiDollarSign, FiCheckCircle, FiClock, FiMapPin, FiEdit2 } from 'react-icons/fi';
 
@@ -33,6 +32,58 @@ const Bookingpage = () => {
   const handleRefundChange = (e) => {
     setRefundStatus(e.target.value);
   };
+const handleDeleteOrder = async (orderId) => {
+  if (!window.confirm('Are you sure you want to delete this order?')) return;
+
+  try {
+    // First get the order data before deleting
+    const orderToDelete = orders.find(order => order.id === orderId);
+    if (!orderToDelete) throw new Error('Order not found');
+
+    const { packageName, checkInDate, timeSlot } = orderToDelete.productDetails;
+
+    // Delete the order document
+    await deleteDoc(doc(fireDB, 'orders', orderId));
+
+    // Update the venue's bookedRooms
+    const venueRef = doc(fireDB, 'venues', packageName);
+    const venueSnap = await getDoc(venueRef);
+
+    if (venueSnap.exists()) {
+      const venueData = venueSnap.data();
+      const updatedBookedRooms = { ...venueData.bookedRooms };
+
+      if (updatedBookedRooms && updatedBookedRooms[checkInDate]) {
+        // Decrement the count for this time slot
+        if (updatedBookedRooms[checkInDate][timeSlot]) {
+          updatedBookedRooms[checkInDate][timeSlot] -= 1;
+          
+          // If count reaches 0, remove the time slot
+          if (updatedBookedRooms[checkInDate][timeSlot] <= 0) {
+            delete updatedBookedRooms[checkInDate][timeSlot];
+          }
+        }
+
+        // If no more time slots for this date, remove the date entry
+        if (Object.keys(updatedBookedRooms[checkInDate]).length === 0) {
+          delete updatedBookedRooms[checkInDate];
+        }
+
+        // Update the venue document
+        await updateDoc(venueRef, {
+          bookedRooms: updatedBookedRooms
+        });
+      }
+    }
+
+    // Update local state
+    setOrders(orders.filter(order => order.id !== orderId));
+    alert('Order and booking slot deleted successfully');
+  } catch (error) {
+    console.error('Error deleting order:', error);
+    alert(`Failed to delete order: ${error.message}`);
+  }
+};
 
   const updateRefundStatus = async () => {
     if (selectedOrder) {
@@ -115,65 +166,96 @@ const Bookingpage = () => {
         </div>
       </div>
 
-      <div className="bliss-booking-table-container">
-        <table className="bliss-booking-table">
-          <thead>
-            <tr>
-              <th onClick={() => handleSort('productDetails.orderId')}>
-                Order ID <SortIndicator columnKey="productDetails.orderId" />
-              </th>
-              <th onClick={() => handleSort('name')}>
-                Customer <SortIndicator columnKey="name" />
-              </th>
-              <th onClick={() => handleSort('mobileNumber')}>
-                Mobile <SortIndicator columnKey="mobileNumber" />
-              </th>
-              <th onClick={() => handleSort('productDetails.packageName')}>
-                Package <SortIndicator columnKey="productDetails.packageName" />
-              </th>
-              <th onClick={() => handleSort('productDetails.totalPrice')}>
-                Amount <SortIndicator columnKey="productDetails.totalPrice" />
-              </th>
-              <th>
-                Payment 
-              </th>
-              <th onClick={() => handleSort('productDetails.checkInDate')}>
-                Date <SortIndicator columnKey="productDetails.checkInDate" />
-              </th>
-              <th>Actions</th>
+<div className="bliss-booking-table-container">
+  <table className="bliss-booking-table">
+    <thead>
+      <tr>
+        <th onClick={() => handleSort('name')}>
+          Customer <SortIndicator columnKey="name" />
+        </th>
+        <th onClick={() => handleSort('mobileNumber')}>
+          Mobile <SortIndicator columnKey="mobileNumber" />
+        </th>
+        <th onClick={() => handleSort('productDetails.packageName')}>
+          Package <SortIndicator columnKey="productDetails.packageName" />
+        </th>
+        <th onClick={() => handleSort('productDetails.totalBeforePaymentOption')}>
+          Total Amount <SortIndicator columnKey="productDetails.totalBeforePaymentOption" />
+        </th>
+        <th onClick={() => handleSort('productDetails.totalPrice')}>
+          Paid Amount <SortIndicator columnKey="productDetails.totalPrice" />
+        </th>
+        <th onClick={() => handleSort('productDetails.remainingAmount')}>
+          Remaining <SortIndicator columnKey="productDetails.remainingAmount" />
+        </th>
+        <th onClick={() => handleSort('createdAt')}>
+          Booked Date <SortIndicator columnKey="createdAt" />
+        </th>
+        <th onClick={() => handleSort('productDetails.checkInDate')}>
+          Event Date <SortIndicator columnKey="productDetails.checkInDate" />
+        </th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {filteredOrders.length > 0 ? (
+        filteredOrders.map((order) => {
+          // Calculate remaining amount
+          const totalAmount = order.productDetails?.totalBeforePaymentOption || order.productDetails?.price || 0;
+          const paidAmount = order.productDetails?.totalPrice || 0;
+          const remainingAmount = totalAmount - paidAmount;
+          
+          // Format booked date
+          const bookedDate = order.createdAt 
+            ? new Date(order.createdAt).toLocaleDateString('en-IN', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+              })
+            : 'N/A';
+
+          return (
+            <tr key={order.id} className="bliss-booking-row">
+              <td className="bliss-customer-name">{order.name}</td>
+              <td className="bliss-mobile-number">{order.mobileNumber}</td>
+              <td className="bliss-package-name">{order.productDetails?.packageName}</td>
+              <td className="bliss-total-amount">₹{totalAmount}</td>
+              <td className="bliss-paid-amount">₹{paidAmount}</td>
+              <td className="bliss-remaining-amount">₹{remainingAmount > 0 ? remainingAmount : 0}</td>
+<td className="bliss-booked-date">
+  {order.createdAt 
+    ? new Date(order.createdAt.seconds * 1000).toLocaleDateString('en-IN', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      })
+    : 'N/A'}
+</td>              <td className="bliss-event-date">{order.productDetails?.checkInDate}</td>
+              <td className="bliss-actions">
+                <button 
+                  className="bliss-view-btn" 
+                  onClick={() => handleViewDetails(order)}
+                >
+                  <FiEdit2 size={14} /> Details
+                </button>
+                <button
+                  className="bliss-delete-btn"
+                  onClick={() => handleDeleteOrder(order.id)}
+                >
+                  Delete
+                </button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {filteredOrders.length > 0 ? (
-              filteredOrders.map((order) => (
-                <tr key={order.id} className="bliss-booking-row">
-                  <td className="bliss-order-id">{order.productDetails?.orderId}</td>
-                  <td className="bliss-customer-name">{order.name}</td>
-                  <td className="bliss-mobile-number">{order.mobileNumber}</td>
-                  <td className="bliss-package-name">{order.productDetails?.packageName}</td>
-                  <td className="bliss-amount">₹{order.productDetails?.totalPrice}</td>
-                  <td className={`bliss-payment-status ${order.paymentDetails?.code === 'PAYMENT_SUCCESS' ? 'bliss-paid' : 'bliss-pending'}`}>
-                    {order.paymentDetails?.code === 'PAYMENT_SUCCESS' ? 'Paid' : 'Pending'}
-                  </td>
-                  <td className="bliss-checkin-date">{order.productDetails?.checkInDate}</td>
-                  <td className="bliss-actions">
-                    <button 
-                      className="bliss-view-btn" 
-                      onClick={() => handleViewDetails(order)}
-                    >
-                      <FiEdit2 size={14} /> Details
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr className="bliss-no-results">
-                <td colSpan="8">No bookings found</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          );
+        })
+      ) : (
+        <tr className="bliss-no-results">
+          <td colSpan="9">No bookings found</td>
+        </tr>
+      )}
+    </tbody>
+  </table>
+</div>
 
       {selectedOrder && (
         <div className="bliss-modal-overlay">

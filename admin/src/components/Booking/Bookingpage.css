@@ -359,3 +359,58 @@
     width: 100%;
   }
 }
+/* Add this to your Bookingpage.css file */
+
+.bliss-delete-btn {
+  background-color: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  margin-left: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.bliss-delete-btn:hover {
+  background-color: #cc0000;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.bliss-delete-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* If you want to add an icon */
+.bliss-delete-btn svg {
+  margin-right: 4px;
+}
+
+/* Adjust the actions cell to accommodate both buttons */
+.bliss-actions {
+  display: flex;
+  gap: 8px; /* Space between buttons */
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .bliss-delete-btn {
+    padding: 4px 8px;
+    font-size: 12px;
+    margin-left: 4px;
+  }
+  
+  .bliss-actions {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
