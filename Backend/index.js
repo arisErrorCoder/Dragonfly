@@ -347,11 +347,15 @@ const sendOrderEmails = (orderData, isSuccess) => {
   } = orderData;
 
   // Safely access payment details with fallbacks
-  const paymentData = paymentDetails?.data || {};
-  const transactionId = paymentData.transactionId || paymentDetails?.transactionId || 'N/A';
-  const paidAmount = paymentData.amount ? paymentData.amount / 100 : amount;
-  const totalAmount = productDetails.price || amount * 2; // Assuming 50% payment if price exists
-  const remainingAmount = totalAmount - paidAmount;
+const paymentData = paymentDetails?.data || {};
+const transactionId = paymentData.transactionId || paymentDetails?.transactionId || 'N/A';
+const paidAmount = paymentData.amount ? paymentData.amount / 100 : amount;
+
+// Use totalBeforePaymentOption for calculations
+const totalAmount = productDetails.totalBeforePaymentOption || amount * 2; // Fallback to amount*2 if totalBeforePaymentOption doesn't exist
+const remainingAmount = totalAmount - paidAmount;
+
+  
   
   // Improved date formatting
   const formatDate = (dateString) => {
