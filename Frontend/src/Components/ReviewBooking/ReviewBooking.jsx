@@ -218,70 +218,70 @@ const BookingReview = ({ isGuest, setIsGuest }) => {
     }
   };
 
-  const checkSlotAvailability = async () => {
-    const venue = formatVenueText(bookingData?.packageName);
+  // const checkSlotAvailability = async () => {
+  //   const venue = formatVenueText(bookingData?.packageName);
     
-    if (!checkInDate) {
-      setErrorMessage("Please select a date");
-      return;
-    }
+  //   if (!checkInDate) {
+  //     setErrorMessage("Please select a date");
+  //     return;
+  //   }
     
-    if (!timeSlot) {
-      setErrorMessage("Please select a time slot");
-      return;
-    }
+  //   if (!timeSlot) {
+  //     setErrorMessage("Please select a time slot");
+  //     return;
+  //   }
   
-    if (!venue) {
-      setErrorMessage("Venue information is missing");
-      setLoading(false);
-      return;
-    }
+  //   if (!venue) {
+  //     setErrorMessage("Venue information is missing");
+  //     setLoading(false);
+  //     return;
+  //   }
     
-    setLoading(true);
-    setErrorMessage("");
-    setSuccessMessage("");
+  //   setLoading(true);
+  //   setErrorMessage("");
+  //   setSuccessMessage("");
     
-    try {
-      // First check if we already have availability data
-      if (roomsAvailable !== null) {
-        if (roomsAvailable <= 0) {
-          setErrorMessage("No rooms available for this time slot. Please choose another.");
-        } else {
-          setSuccessMessage("Time slot available!");
-        }
-        return;
-      }
+  //   try {
+  //     // First check if we already have availability data
+  //     if (roomsAvailable !== null) {
+  //       if (roomsAvailable <= 0) {
+  //         setErrorMessage("No rooms available for this time slot. Please choose another.");
+  //       } else {
+  //         setSuccessMessage("Time slot available!");
+  //       }
+  //       return;
+  //     }
   
-      // If we don't have availability data yet, fetch it
-      const availabilityRef = doc(db, 'venueAvailability', venue);
-      const docSnap = await getDoc(availabilityRef);
+  //     // If we don't have availability data yet, fetch it
+  //     const availabilityRef = doc(db, 'venueAvailability', venue);
+  //     const docSnap = await getDoc(availabilityRef);
       
-      if (docSnap.exists()) {
-        const availabilityData = docSnap.data();
-        const dateKey = checkInDate; // or format the date if needed
+  //     if (docSnap.exists()) {
+  //       const availabilityData = docSnap.data();
+  //       const dateKey = checkInDate; // or format the date if needed
         
-        if (availabilityData[dateKey] && availabilityData[dateKey][timeSlot]) {
-          const availableRooms = availabilityData[dateKey][timeSlot].available;
-          setRoomsAvailable(availableRooms);
+  //       if (availabilityData[dateKey] && availabilityData[dateKey][timeSlot]) {
+  //         const availableRooms = availabilityData[dateKey][timeSlot].available;
+  //         setRoomsAvailable(availableRooms);
           
-          if (availableRooms <= 0) {
-            setErrorMessage("No rooms available for this time slot. Please choose another.");
-          } else {
-            setSuccessMessage("Time slot available!");
-          }
-        } else {
-          setErrorMessage("Availability data not found for selected date/time");
-        }
-      } else {
-        setErrorMessage("Venue availability data not found");
-      }
-    } catch (error) {
-      console.error("Error checking availability:", error);
-      setErrorMessage("An error occurred while checking availability.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  //         if (availableRooms <= 0) {
+  //           setErrorMessage("No rooms available for this time slot. Please choose another.");
+  //         } else {
+  //           setSuccessMessage("Time slot available!");
+  //         }
+  //       } else {
+  //         setErrorMessage("Availability data not found for selected date/time");
+  //       }
+  //     } else {
+  //       setErrorMessage("Venue availability data not found");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error checking availability:", error);
+  //     setErrorMessage("An error occurred while checking availability.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleProceedToCheckout = async () => {
     if (!validateFields()) {
@@ -299,6 +299,7 @@ const BookingReview = ({ isGuest, setIsGuest }) => {
       checkInDate,
       paymentOption,
       totalPrice: finalTotal,
+      totalBeforePaymentOption: totalRoomPrice, // Add this line
       specialRequest: request,
       billingName,
       billingPhone,
@@ -324,6 +325,7 @@ const BookingReview = ({ isGuest, setIsGuest }) => {
           guestList,
           paymentOption,
           finalTotal,
+          totalBeforePaymentOption: totalRoomPrice, // Add this line
           request,
           checkInDate,
           billingName,

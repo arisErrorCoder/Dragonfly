@@ -4,15 +4,15 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import './Moments.css'; 
 
-import moment1Image from '../../assets/moment 1.jpg';
-import moment2Image from '../../assets/moment 2.jpg';
-import moment3Image from '../../assets/moment 3.jpg';
-import moment4Image from '../../assets/moment 4.jpg';
-import moment5Image from '../../assets/moment 5.jpg';
+import moment1Image from '../../assets/imggallery/1 (2).jpg';
+import moment2Image from '../../assets/imggallery/2 (1).jpg';
+import moment3Image from '../../assets/imggallery/3.jpg';
+import moment4Image from '../../assets/imggallery/4.jpg';
+import moment5Image from '../../assets/imggallery/5.jpg';
 
-import moment6Image from '../../assets/moment 6.jpg';
-import moment8Image from '../../assets/moment 8.jpg';
-import moment9Image from '../../assets/moment 9.jpg';
+import moment6Image from '../../assets/imggallery/6.jpg';
+import moment8Image from '../../assets/imggallery/7.jpg';
+import moment9Image from '../../assets/imggallery/8.jpeg';
 import { Link } from 'react-router-dom';
 
 const Moment = () => {
@@ -91,6 +91,9 @@ const Moment = () => {
               </div>
             ))}
           </Slider>
+                      <Link style={{textDecoration:"none"}}to='/gallery'>
+        <button>View Gallery</button>
+                    </Link>
         </div>
       </div>
     </div>

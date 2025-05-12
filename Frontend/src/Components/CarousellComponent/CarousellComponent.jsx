@@ -5,10 +5,10 @@ import 'slick-carousel/slick/slick-theme.css';
 import './CarousellComponent.css'; // Make sure this CSS file exists and contains necessary styles
 
 // Import images
-import image1 from '../../assets/desk1.jpg';
-import image2 from '../../assets/desk2.jpg';
-import image3 from '../../assets/desk3.jpg';
-import image4 from '../../assets/desk4.jpg';
+import image1 from '../../assets/heroslider/carousel 1.jpg';
+import image2 from '../../assets/heroslider/carousel 2.jpeg';
+import image3 from '../../assets/heroslider/carousel 3.jpg';
+import image4 from '../../assets/heroslider/carousel 4.jpg';
 
 const ImageSlider = () => {
   // Slider settings

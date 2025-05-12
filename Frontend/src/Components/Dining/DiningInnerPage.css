@@ -426,14 +426,13 @@
 
 
 .cardss-li {
-
   border: 1px solid #ddd;    /* Light gray border */
   border-radius: 4px;        /* Rounded corners */
   padding: 10px 15px;        /* Padding for list items */
   margin-bottom: 10px;       /* Space between list items */
   transition: background-color 0.3s; /* Smooth background transition */
-  text-align: justify;
-}
+  text-align: start;
+  }
 
 /* Change background color on hover */
 

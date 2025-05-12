@@ -32,6 +32,7 @@ import Register from './Components/Register/Register'
 import VerifyEmail from './Components/Register/VerifyEmail'
 import ForgotPassword from './Components/Register/ForgotPassword'
 import ResetPassword from './Components/Register/ResetPassword'
+import GroupPackages from './Components/Pages/GroupPackages'
 
 const App = () => {
   // src/index.js or App.js
@@ -97,6 +98,7 @@ function Success() {
             <Route path="/verify-email" element={<VerifyEmail/>} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/grouppacakges" element={<GroupPackages />} />
           </Routes>
           <Footer />
           <HoverButtons/>

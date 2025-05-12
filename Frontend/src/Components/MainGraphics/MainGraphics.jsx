@@ -3,7 +3,7 @@ import './MainGraphics.css';
 import lineart from '../../assets/line art.jpg';
 import pebbleart from '../../assets/pebble art.jpg';
 import decorations from '../../assets/decoration.jpg';
-import stays from '../../assets/outdoorimg.jpg';
+import stays from '../../assets/outdoor.jpg';
 import dining from '../../assets/dining.jpg';
 import rooftop from '../../assets/rooftop.jpg';
 import birthdays from '../../assets/birthdays.jpg';
