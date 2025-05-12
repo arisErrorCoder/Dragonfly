@@ -9,7 +9,9 @@ const PhotoGallery = () => {
     const [selectedImage, setSelectedImage] = useState(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-
+     useEffect(() => {
+  window.scrollTo(0, 0);
+}, []);
     useEffect(() => {
         const fetchImages = async () => {
             try {
